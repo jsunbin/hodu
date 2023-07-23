@@ -7,11 +7,16 @@ export default function Button({
   size = 'lg',
   type = 'button',
   className,
-  disabled = false,
   color = 'default',
+  disabled = false,
+  icon = false,
 }) {
-  console.log(disabled);
-  const buttonStyles = [commonStyles, sizeStyles[size], colorStyles[color]];
+  const buttonStyles = [
+    commonStyles,
+    sizeStyles[size],
+    iconStyles[icon],
+    colorStyles[color],
+  ];
   return (
     <button css={buttonStyles} type={type} disabled={disabled}>
       {children}
@@ -71,6 +76,15 @@ const sizeStyles = {
       background: '#c4c4c4',
       cursor: 'unset',
     },
+  },
+};
+
+const iconStyles = {
+  true: {
+    display: 'flex',
+    justifyContent: 'center',
+    alignItems: 'center',
+    gap: '8px',
   },
 };
 
