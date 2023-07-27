@@ -1,7 +1,7 @@
 /** @jsxImportSource @emotion/react */
 import React from 'react';
 import { css } from '@emotion/react';
-import LogoImg from '../../../assets/images/Logo-hodu.svg';
+import LogoImg from '../../../../assets/images/Logo-hodu.svg';
 
 export default function LogoHeader() {
   return (
