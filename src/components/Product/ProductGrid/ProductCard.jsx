@@ -1,7 +1,7 @@
 /** @jsxImportSource @emotion/react */
 import React from 'react';
 import { css } from '@emotion/react';
-import Price from '../Price/Price';
+import Price from '../../Price/Price';
 
 export default function ProductCard() {
   return (
