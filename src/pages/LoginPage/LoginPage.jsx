@@ -1,10 +1,10 @@
 /** @jsxImportSource @emotion/react */
 import React from 'react';
 import { css } from '@emotion/react';
-import LogoHeader from '../../components/common/Header/LogoHeader';
+import LogoHeader from '../../components/common/Header/LogoHeader/LogoHeader';
 import LoginType from '../../components/Login/LoginType';
 import LoginForm from '../../components/LoginForm/LoginForm';
-import LoginMore from '../../components/Login/LoginMore';
+import MoreList from '../../components/MoreList/MoreList';
 
 export default function LoginPage() {
   return (
@@ -14,7 +14,7 @@ export default function LoginPage() {
         <div css={divStyles} className="login-wrapper">
           <LoginType />
           <LoginForm />
-          <LoginMore />
+          <MoreList />
         </div>
       </main>
     </>
