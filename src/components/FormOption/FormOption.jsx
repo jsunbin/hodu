@@ -2,17 +2,21 @@
 import React from 'react';
 import { css } from '@emotion/react';
 
-export default function LoginType() {
+export default function FormOption({ type }) {
   return (
-    <ul css={listStyles} className="login-type">
+    <ul css={listStyles} className="login-options">
       <li>
         <button css={btnStyles} className="btn-customer active">
-          <span css={spanStyles}>구매회원 로그인</span>
+          <span css={spanStyles}>
+            구매회원{type === 'login' ? ' 로그인' : '회원가입'}
+          </span>
         </button>
       </li>
       <li>
         <button css={btnStyles} className="btn-seller">
-          <span css={spanStyles}>판매회원 로그인</span>
+          <span css={spanStyles}>
+            판매회원{type === 'login' ? ' 로그인' : '회원가입'}
+          </span>
         </button>
       </li>
     </ul>
