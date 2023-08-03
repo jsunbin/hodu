@@ -1,11 +1,37 @@
 /** @jsxImportSource @emotion/react */
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { css } from '@emotion/react';
 
 export default function Amount() {
+  const [amount, setAmount] = useState(1);
+  const [isDisabled, setIsDisabled] = useState(true);
+
+  const minusClickHandler = () => {
+    setAmount(prev => prev - 1);
+  };
+
+  const plusClickHandelr = () => {
+    setAmount(prev => prev + 1);
+  };
+
+  useEffect(() => {
+    console.log(amount);
+    if (amount === 1) {
+      setIsDisabled(true);
+    } else if (amount > 1) {
+      setIsDisabled(false);
+    }
+  }, [amount]);
+
   return (
     <div css={amountDivStyles}>
-      <button css={minusButtonStlyes} type="button" className="btn-minus">
+      <button
+        css={minusButtonStlyes}
+        type="button"
+        className="btn-minus"
+        onClick={minusClickHandler}
+        disabled={isDisabled}
+      >
         <span className="a11y-hidden">수량 빼기</span>
         <svg
           width="20"
@@ -17,12 +43,12 @@ export default function Amount() {
           <path d="M0 10H20" stroke="#C4C4C4" strokeWidth="2" />
         </svg>
       </button>
-      <strong css={strongStyles}>1</strong>
+      <strong css={strongStyles}>{amount}</strong>
       <button
         css={plusButtonStlyes}
         type="button"
         className="btn-plus"
-        disabled
+        onClick={plusClickHandelr}
       >
         <span className="a11y-hidden">수량 추가</span>
         <svg
