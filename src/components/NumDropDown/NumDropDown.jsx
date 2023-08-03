@@ -46,6 +46,10 @@ const ulStyles = css({
   borderRadius: '5px',
   border: '1px solid #c4c4c4',
   overflowY: 'scroll',
+  position: 'absolute',
+  top: '60px',
+  left: '0',
+  zIndex: '10',
   '&::-webkit-scrollbar': {
     width: '16px',
   },
@@ -59,6 +63,7 @@ const ulStyles = css({
   li: {
     button: {
       width: '134px',
+      height: '40px',
       background: '#fff',
       padding: '10px 0',
       '&:hover': {
