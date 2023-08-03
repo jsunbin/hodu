@@ -3,7 +3,6 @@ import React, { useState } from 'react';
 import { css } from '@emotion/react';
 import Button from '../Button/Button';
 import NumDropDown from '../NumDropDown/NumDropDown';
-import './j.css';
 import CheckText from '../CheckText/CheckText';
 
 export default function JoinForm() {
