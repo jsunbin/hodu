@@ -6,18 +6,21 @@ import { css } from '@emotion/react';
 const sizeStyles = {
   sm: {
     fontSize: '18px',
+    lineHegight: '23px',
     '&::after': {
       marginLeft: '2px',
     },
   },
   md: {
     fontSize: '24px',
+    lineHegight: '30px',
     '&::after': {
       marginLeft: '4px',
     },
   },
   lg: {
     fontSize: '36px',
+    lineHegight: '45px',
     '&::after': {
       marginLeft: '4px',
     },
@@ -36,8 +39,12 @@ const price = css({
   },
 });
 
-export default function Price({ children, size, className }) {
-  const priceStyles = [price, sizeStyles[size]];
+export default function Price({ children, size, className, color }) {
+  const priceStyles = [
+    price,
+    sizeStyles[size],
+    css({ color: color, '&::after': { color: color } }),
+  ];
 
   return (
     <div>
