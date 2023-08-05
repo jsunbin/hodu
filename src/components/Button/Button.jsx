@@ -10,12 +10,14 @@ export default function Button({
   color = 'default',
   disabled = false,
   icon = false,
+  width,
 }) {
   const buttonStyles = [
     commonStyles,
     sizeStyles[size],
     iconStyles[icon],
     colorStyles[color],
+    css({ width: width }),
   ];
   return (
     <button css={buttonStyles} type={type} disabled={disabled}>
