@@ -35,6 +35,9 @@ const tableStyles = props => css`
 const tbodyStyles = props => css`
   border-collapse: separate;
   border-spacing: ${props.page === 'cart' ? '0 10px' : '0 16px'};
+  td {
+    vertical-align: middle;
+  }
 `;
 
 const trStyles = props => css`
