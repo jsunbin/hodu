@@ -1,12 +1,12 @@
 /** @jsxImportSource @emotion/react */
 import React from 'react';
 import { css } from '@emotion/react';
-import TabTitle from '../../TabTitle/TabTitle';
+import ProductTableTitle from './ProductTableTitle';
 
 export default function ProductTable() {
   return (
     <table css={tableStyles} className="order-table">
-      <TabTitle page="order" />
+      <ProductTableTitle page="order" />
       <tbody css={tbodyStyles}>
         <tr>
           <td colSpan={2}>

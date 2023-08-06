@@ -2,7 +2,10 @@
 import React, { useState } from 'react';
 import { css } from '@emotion/react';
 
-export default function TabTitle({ page = 'cart', isCheckBox = true }) {
+export default function ProductTableTitle({
+  page = 'cart',
+  isCheckBox = true,
+}) {
   const [isChecked, setIsChecked] = useState(false);
 
   const handleCheckBoxClick = event => {
@@ -16,6 +19,9 @@ export default function TabTitle({ page = 'cart', isCheckBox = true }) {
       colgroup: (
         <colgroup>
           <col width="80" />
+          <col width="628" />
+          <col width="auto" />
+          <col width="246" />
           <col width="auto" />
         </colgroup>
       ),
