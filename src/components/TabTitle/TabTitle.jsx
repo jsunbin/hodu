@@ -97,7 +97,7 @@ const headTrStyles = css({
     fontWeight: '400',
     lineHeight: '60px',
     background: '#f2f2f2',
-    ':first-child': {
+    ':first-of-type': {
       borderRadius: '10px 0 0 10px',
     },
     ':last-child': {
