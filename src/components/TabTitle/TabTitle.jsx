@@ -16,6 +16,7 @@ export default function TabTitle({ page = 'cart', isCheckBox = true }) {
       colgroup: (
         <colgroup>
           <col width="80" />
+          <col width="auto" />
         </colgroup>
       ),
       th: [
@@ -55,6 +56,11 @@ export default function TabTitle({ page = 'cart', isCheckBox = true }) {
     },
     order: {
       caption: '주문내역',
+      colgroup: (
+        <colgroup>
+          <col width="auto" />
+        </colgroup>
+      ),
       th: ['상품정보', '할인', '배송비', '주문금액'],
     },
   };
@@ -66,7 +72,7 @@ export default function TabTitle({ page = 'cart', isCheckBox = true }) {
       <thead>
         <tr css={headTrStyles}>
           {tabTitleList[page].th.map(item => {
-            return item === '상품금액' || item === '상품정보' ? (
+            return item === '상품정보' ? (
               <th scope="colgroup" colSpan={2} key={item}>
                 {item}
               </th>
