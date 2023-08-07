@@ -29,7 +29,6 @@ const tableStyles = props => css`
   text-align: center;
   border-collapse: separate;
   border-spacing: ${props.page === 'cart' ? '0 35px' : '0 16px'};
-  margin: 100px auto;
 `;
 
 const tbodyStyles = props => css`
