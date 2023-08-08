@@ -40,12 +40,13 @@ const commonStyles = css({
 
 const sizeStyles = {
   sm: {
-    width: '80px',
+    minWidth: '80px',
     height: '40px',
     background: '#21bf48',
     color: '#fff',
     fontSize: '16px',
     fontWeight: '500',
+    padding: '10px 25px',
   },
   ms: {
     width: '166px',
