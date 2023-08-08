@@ -63,7 +63,6 @@ const ulStyles = css`
   li {
     display: inline-block;
     margin-right: 26px;
-    box-shadow: inset 0 0 10px red;
 
     &:last-child {
       margin: 0;
