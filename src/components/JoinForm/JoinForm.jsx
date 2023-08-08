@@ -99,7 +99,10 @@ export default function JoinForm() {
           </div>
         </section>
 
-        <CheckText />
+        <CheckText>
+          호두샵의 <a href="/#">이용약관</a> 및{' '}
+          <a href="/#">개인정보처리방침</a>에 대한 내용을 확인하였고 동의합니다.
+        </CheckText>
 
         <div css={btnWrapDivStyles} className="btn-submit-wrap">
           <Button size="md" type="submit" disabled={true}>
@@ -118,6 +121,7 @@ const formStyles = css({
   width: '550px',
   minHeight: '586px',
   padding: '35px',
+  marginBottom: '34px',
   borderRadius: '10px',
   background: '#fff',
   position: 'relative',

@@ -4,7 +4,7 @@ import { css } from '@emotion/react';
 import checkIcon from '../../assets/images/check-box.svg';
 import checkFillIcon from '../../assets/images/check-fill-box.svg';
 
-export default function CheckText() {
+export default function CheckText({ children, color = '#000' }) {
   const [isChecked, setIsChecked] = useState(false);
 
   const handleCheckBoxChage = () => {
@@ -22,9 +22,8 @@ export default function CheckText() {
         checked={isChecked}
       />
       <label htmlFor="agreeAll" onClick={handleCheckBoxChage}>
-        <p css={pStyles} className="text">
-          호두샵의 <a href="/#">이용약관</a> 및{' '}
-          <a href="/#">개인정보처리방침</a>에 대한 내용을 확인하였고 동의합니다.
+        <p css={pStyles({ color })} className="text">
+          {children}
         </p>
       </label>
     </div>
@@ -32,9 +31,9 @@ export default function CheckText() {
 }
 
 const divStyles = css({
-  width: '480px',
+  maxWidth: '454px',
   position: 'relative',
-  margin: '34px auto 0',
+  margin: '0 auto',
 });
 
 const inputStyles = css({
@@ -60,18 +59,32 @@ const inputStyles = css({
   },
 });
 
-const pStyles = css({
-  color: '#c4c4c4',
-  fontFamily: 'Spoqa Han Sans Neo',
-  fontSize: '16px',
-  fontStyle: 'normal',
-  fontWeight: '400',
-  lineHeight: 'normal',
-  paddingLeft: '26px',
-  a: {
-    color: '#767676',
-    fontWeight: '700',
-    fontSize: '16px',
-    textDecoration: 'underline',
-  },
-});
+const pStyles = props => css`
+  color: ${props.color};
+  font-family: Spoqa Han Sans Neo;
+  font-size: 16px;
+  font-weight: 400;
+  line-height: 20px;
+  padding-left: 26px;
+  a {
+    color: #767676;
+    font-weight: 700;
+    font-size: 16px;
+    text-decoration: underline;
+  }
+`;
+
+// const pStyles = css({
+//   color: '#c4c4c4',
+//   fontFamily: 'Spoqa Han Sans Neo',
+//   fontSize: '16px',
+//   fontWeight: '400',
+//   lineHeight: '20px',
+//   paddingLeft: '26px',
+//   a: {
+//     color: '#767676',
+//     fontWeight: '700',
+//     fontSize: '16px',
+//     textDecoration: 'underline',
+//   },
+// });
