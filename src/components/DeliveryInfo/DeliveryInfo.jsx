@@ -13,20 +13,38 @@ export default function DeliveryInfo() {
           <section css={sectionStlyes}>
             <div css={divStyles}>
               <label htmlFor="name">이름</label>
-              <input type="text" id="name" />
+              <input css={inputStyles} type="text" id="name" />
             </div>
             <div css={divStyles}>
               <label htmlFor="phoneNo">휴대폰</label>
-              <input type="tel" id="phoneNo" name="phoneNo" maxLength={3} />
+              <input
+                css={inputStyles({ width: '80px', margin: '0 10px 0 0' })}
+                type="tel"
+                id="phoneNo"
+                name="phoneNo"
+                maxLength={3}
+              />
               -
-              <input type="tel" id="phoneNo" name="phoneNo" maxLength={4} />
+              <input
+                css={inputStyles({ width: '100px', margin: '0 10px' })}
+                type="tel"
+                id="phoneNo"
+                name="phoneNo"
+                maxLength={4}
+              />
               -
-              <input type="tel" id="phoneNo" name="phoneNo" maxLength={4} />
+              <input
+                css={inputStyles({ width: '100px', margin: '0 10px' })}
+                type="tel"
+                id="phoneNo"
+                name="phoneNo"
+                maxLength={4}
+              />
             </div>
 
             <div css={divStyles}>
               <label htmlFor="inputEmail">email</label>
-              <input type="email" id="inputEmail" />
+              <input css={inputStyles} type="email" id="inputEmail" />
             </div>
           </section>
         </fieldset>
@@ -36,11 +54,12 @@ export default function DeliveryInfo() {
           <section css={sectionStlyes}>
             <div css={divStyles}>
               <label htmlFor="recipient">수령인</label>
-              <input type="text" id="recipient" />
+              <input css={inputStyles} type="text" id="recipient" />
             </div>
             <div css={divStyles}>
               <label htmlFor="recipientPhoneNo">휴대폰</label>
               <input
+                css={inputStyles({ width: '80px', margin: '0 10px 0 0' })}
                 type="tel"
                 id="recipientPhoneNo"
                 name="phoneNo"
@@ -48,6 +67,7 @@ export default function DeliveryInfo() {
               />
               -
               <input
+                css={inputStyles({ width: '100px', margin: '0 10px' })}
                 type="tel"
                 id="recipientPhoneNo"
                 name="phoneNo"
@@ -55,6 +75,7 @@ export default function DeliveryInfo() {
               />
               -
               <input
+                css={inputStyles({ width: '100px', margin: '0 10px' })}
                 type="tel"
                 id="recipientPhoneNo"
                 name="phoneNo"
@@ -66,16 +87,30 @@ export default function DeliveryInfo() {
               <label htmlFor="address">배송주소</label>
               <div css={addressInputDivStyles}>
                 <span css={zipcodeStyles}>
-                  <input type="text" />
+                  <input css={inputStyles} type="text" />
                   <Button size="sm">우편번호 조회</Button>
                 </span>
-                <input type="text" id="address" className="address" />
-                <input type="text" id="address" className="detail-addrress" />
+                <input
+                  css={inputStyles({ width: '800px' })}
+                  type="text"
+                  id="address"
+                  className="address"
+                />
+                <input
+                  css={inputStyles({ width: '800px' })}
+                  type="text"
+                  id="address"
+                  className="detail-addrress"
+                />
               </div>
             </div>
             <div css={divStyles}>
-              <label htmlFor="inputEmail">배송메시지</label>
-              <input type="email" id="inputEmail" />
+              <label htmlFor="inputDeliveryMessage">배송메시지</label>
+              <input
+                css={inputStyles({ width: '800px' })}
+                type="email"
+                id="inputDeliveryMessage"
+              />
             </div>
           </section>
         </fieldset>
@@ -125,22 +160,15 @@ const sectionStlyes = css`
     line-height: normal;
     margin-right: 50px;
   }
+`;
 
-  input {
-    width: 334px;
-    height: 40px;
-    line-height: 40px;
-    border: 1px solid #c4c4c4;
-  }
-  input#phoneNo,
-  input#recipientPhoneNo {
-    width: 80px;
-    margin: 0 10px;
-  }
-  input#phoneNo:first-of-type,
-  input#recipientPhoneNo:first-of-type {
-    margin: 0 10px 0 0;
-  }
+const inputStyles = props => css`
+  width: ${props.width || '334px'};
+  height: 40px;
+  line-height: 40px;
+  box-sizing: border-box;
+  border: 1px solid #c4c4c4;
+  margin: ${props.margin};
 `;
 
 const divStyles = css`
