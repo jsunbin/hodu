@@ -21,6 +21,7 @@ export default function CheckText({ children, color = '#000', setIsDisabled }) {
         id="agreeAll"
         className="a11y-hidden"
         checked={isChecked}
+        readOnly
       />
       <label htmlFor="agreeAll" onClick={handleCheckBoxChage}>
         <p css={pStyles({ color })} className="text">

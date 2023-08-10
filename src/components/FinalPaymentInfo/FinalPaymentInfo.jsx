@@ -71,7 +71,7 @@ const divItemStyles = css`
   justify-content: space-between;
   align-items: flex-end;
   margin-top: 15px;
-  :first-child {
+  :first-of-type {
     margin: 0;
   }
   :last-child {
