@@ -5,8 +5,9 @@ import Button from '../Button/Button';
 import NumDropDown from '../NumDropDown/NumDropDown';
 import CheckText from '../CheckText/CheckText';
 
-export default function JoinForm() {
+export default function JoinForm({ isSeller }) {
   const [isClicked, setIsClicked] = useState(false);
+
   const phoneNumClickHandler = () => {
     setIsClicked(!isClicked);
   };
@@ -15,7 +16,10 @@ export default function JoinForm() {
     <>
       <form>
         <section css={formStyles} className="form-content">
-          <div css={formListDivStyles} className="form-list">
+          <div
+            css={formListDivStyles({ marginTop: '0' })}
+            className="form-list"
+          >
             <div css={formItemDivStyles} className="form-item user">
               <div css={idInputStyles}>
                 <label htmlFor="id">아이디</label>
@@ -97,6 +101,33 @@ export default function JoinForm() {
               </div>
             </div>
           </div>
+
+          {isSeller && (
+            <div css={formListDivStyles} className="form-list">
+              <div css={formItemDivStyles} className="form-item business">
+                <div css={idInputStyles}>
+                  <label htmlFor="businessId">사업자 등록번호</label>
+                  <input
+                    type="number"
+                    id="businessId"
+                    name="businessId"
+                    className="business-id"
+                    maxLength={10}
+                  />
+                </div>
+                <Button size="ms">인증</Button>
+              </div>
+              <div css={formItemDivStyles} className="form-item store-name">
+                <label htmlFor="password">스토어 이름</label>
+                <input
+                  type="text"
+                  id="storeName"
+                  name="storeName"
+                  maxLength={20}
+                />
+              </div>
+            </div>
+          )}
         </section>
 
         <CheckText>
@@ -129,42 +160,43 @@ const formStyles = css({
 });
 
 // div.form-list
-const formListDivStyles = css({
-  '&:firstChild': {
-    marginBottom: '60px',
-  },
-  label: {
-    display: 'block',
-    color: '#767676',
-    fontFamily: 'Spoqa Han Sans Neo',
-    fontSize: '16px',
-    fontWeight: '400',
-    lineHeight: 'normal',
-  },
-  h4: {
-    display: 'block',
-    color: '#767676',
-    fontFamily: 'Spoqa Han Sans Neo',
-    fontSize: '16px',
-    fontWeight: '400',
-    lineHeight: 'normal',
-  },
-  input: {
-    boxSizing: 'border-box',
-    display: 'inline-block',
-    width: '100%',
-    height: '54px',
-    color: '#000',
-    fontFamily: 'Spoqa Han Sans Neo',
-    fontSize: '16px',
-    fontWeight: '400',
-    lineHeight: '20px',
-    verticalAlign: 'baseline',
-    padding: '17px 16px',
-    borderRadius: '5px',
-    border: '1px solid #c4c4c4',
-  },
-});
+const formListDivStyles = props => css`
+  margin-top: ${props.marginTop || '50px'};
+
+  label {
+    display: block;
+    color: #767676;
+    font-family: 'Spoqa Han Sans Neo';
+    font-size: 16px;
+    font-weight: 400;
+    line-height: normal;
+  }
+
+  h4 {
+    display: block;
+    color: #767676;
+    font-family: 'Spoqa Han Sans Neo';
+    font-size: 16px;
+    font-weight: 400;
+    line-height: normal;
+  }
+
+  input {
+    box-sizing: border-box;
+    display: inline-block;
+    width: 100%;
+    height: 54px;
+    color: #000;
+    font-family: 'Spoqa Han Sans Neo';
+    font-size: 16px;
+    font-weight: 400;
+    line-height: 20px;
+    vertical-align: baseline;
+    padding: 17px 16px;
+    border-radius: 5px;
+    border: 1px solid #c4c4c4;
+  }
+`;
 
 // div.form-item
 const formItemDivStyles = css({
@@ -172,7 +204,7 @@ const formItemDivStyles = css({
   flexDirection: 'column',
   gap: '10px',
   marginBottom: '12px',
-  '&.user': {
+  '&.user, &.business': {
     display: 'flex',
     flexDirection: 'row',
     justifyContent: 'space-between',
