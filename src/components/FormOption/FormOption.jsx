@@ -1,21 +1,44 @@
 /** @jsxImportSource @emotion/react */
-import React from 'react';
+import React, { useState } from 'react';
 import { css } from '@emotion/react';
 
-export default function FormOption({ type }) {
+export default function FormOption({
+  type = 'login',
+  defaultOption,
+  setIsSeller,
+}) {
+  const [activeOption, setActiveOption] = useState(defaultOption);
+
+  const handleOptionClick = (event, userOption) => {
+    event.preventDefault();
+    setIsSeller(userOption);
+    setActiveOption(userOption);
+
+    const button = event.target.closest('button');
+    button.classList.add('acitve');
+  };
+
   return (
     <ul css={listStyles} className="login-options">
       <li>
-        <button css={btnStyles} className="btn-customer active">
+        <button
+          css={btnStyles}
+          className={`btn-customer ${!activeOption && 'active'}`}
+          onClick={event => handleOptionClick(event, false)}
+        >
           <span css={spanStyles}>
-            구매회원{type === 'login' ? ' 로그인' : '회원가입'}
+            구매{type === 'login' ? '회원 로그인' : '회원가입'}
           </span>
         </button>
       </li>
       <li>
-        <button css={btnStyles} className="btn-seller">
+        <button
+          css={btnStyles}
+          className={`btn-seller ${activeOption && 'active'}`}
+          onClick={event => handleOptionClick(event, 'seller')}
+        >
           <span css={spanStyles}>
-            판매회원{type === 'login' ? ' 로그인' : '회원가입'}
+            판매{type === 'login' ? '회원 로그인' : '회원가입'}
           </span>
         </button>
       </li>
@@ -48,12 +71,19 @@ const btnStyles = css({
   background: '#f2f2f2',
   paddingTop: '20px',
   position: 'relative',
-  '&.active': {
+  '&.btn-customer.active': {
     background: '#fff',
     zIndex: 10,
     borderRight: 'none',
     borderBottom: 'none',
     borderBottomLeftRadius: 0,
+  },
+  '&.btn-seller.active': {
+    background: '#fff',
+    zIndex: 10,
+    borderLeft: 'none',
+    borderBottom: 'none',
+    borderBottomRightRadius: 0,
   },
 });
 

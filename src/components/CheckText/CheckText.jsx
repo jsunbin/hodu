@@ -4,7 +4,11 @@ import { css } from '@emotion/react';
 import checkIcon from '../../assets/images/check-box.svg';
 import checkFillIcon from '../../assets/images/check-fill-box.svg';
 
-export default function CheckText({ children, color = '#000', setIsDisabled }) {
+export default function CheckText({
+  children,
+  color = '#000',
+  setIsDisabled = () => {},
+}) {
   const [isChecked, setIsChecked] = useState(false);
 
   const handleCheckBoxChage = () => {
