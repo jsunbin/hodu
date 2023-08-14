@@ -54,7 +54,7 @@ export default function LoginForm({ isSeller }) {
       localStorage.setItem('id', id);
       localStorage.setItem('userType', newUserType);
 
-      navigate('/');
+      navigate(-1);
     } catch (error) {
       if (error.response.status === 401) {
         const errorMessage = error.response.data?.FAIL_Message;
