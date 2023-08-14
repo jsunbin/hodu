@@ -7,6 +7,8 @@ import { loginAPI } from '../../api/login';
 
 export default function LoginForm({ isSeller }) {
   const navigate = useNavigate();
+  const idInputRef = React.createRef();
+  const passwordInputRef = React.createRef();
   const [id, setId] = useState('');
   const [password, setPassword] = useState('');
   const [token, setToken] = useState('');
@@ -26,7 +28,17 @@ export default function LoginForm({ isSeller }) {
   const handleSubmit = async event => {
     event.preventDefault();
     console.log(id, password);
-    await login({ id, password, isSeller });
+
+    // 아이디 입력칸이 공란인 경우 (아이디, 비밀번호 모두 입력하지 않은 경우 or 비밀번호만 입력한 경우)
+    if (id === '') {
+      setLoginError('아이디를 입력해주세요');
+      idInputRef.current.focus();
+    } else if (password === '') {
+      setLoginError('비밀번호를 입력해주세요');
+      passwordInputRef.current.focus();
+    } else {
+      await login({ id, password, isSeller });
+    }
   };
 
   // 로그인
@@ -49,6 +61,7 @@ export default function LoginForm({ isSeller }) {
 
         if (errorMessage) {
           setLoginError('아이디 또는 비밀번호가 일치하지 않습니다.');
+          passwordInputRef.current.focus();
         }
       } else {
         console.error(error);
@@ -69,9 +82,10 @@ export default function LoginForm({ isSeller }) {
               type="text"
               placeholder="아이디"
               autoComplete="username"
-              required
+              // required
               onChange={handleData}
               value={id}
+              ref={idInputRef}
             />
           </div>
           <div css={divStyles} className="input-password-wrapper">
@@ -83,9 +97,10 @@ export default function LoginForm({ isSeller }) {
               type="password"
               placeholder="비밀번호"
               autoComplete="current-password"
-              required
+              // required
               onChange={handleData}
               value={password}
+              ref={passwordInputRef}
             />
           </div>
 
@@ -93,7 +108,7 @@ export default function LoginForm({ isSeller }) {
             css={warningStyles({ loginError: loginError })}
             className="login-warning"
           >
-            아이디 또는 비밀번호가 일치하지 않습니다.
+            {loginError}
           </strong>
         </section>
 
