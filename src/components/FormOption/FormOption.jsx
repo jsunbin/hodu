@@ -35,7 +35,7 @@ export default function FormOption({
         <button
           css={btnStyles}
           className={`btn-seller ${activeOption && 'active'}`}
-          onClick={event => handleOptionClick(event, 'seller')}
+          onClick={event => handleOptionClick(event, true)}
         >
           <span css={spanStyles}>
             판매{type === 'login' ? '회원 로그인' : '회원가입'}
