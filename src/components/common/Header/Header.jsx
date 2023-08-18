@@ -5,31 +5,37 @@ import LogoSection from './LogoSection';
 import SearchForm from './SearchForm';
 import MenuList from './MenuList';
 
-export default function Header() {
+export default function Header({ isLogin, isSeller }) {
   return (
     <header css={headerStyles}>
-      <div className="header-start">
-        <LogoSection />
-        <SearchForm />
-      </div>
+      <div css={headerWrappStyles}>
+        <div css={headerStartStyles}>
+          <LogoSection />
+          <SearchForm />
+        </div>
 
-      <MenuList />
+        <MenuList isLogin={isLogin} isSeller={isSeller} />
+      </div>
     </header>
   );
 }
 
-const headerStyles = css({
-  width: '100%',
-  height: '90px',
-  display: 'flex',
-  justifyContent: 'space-between',
-  alignItems: 'center',
-  background: '#fff',
-  boxShadow: '0px 4px 5px 0px rgba(0, 0, 0, 0.1)',
-  padding: '0 320px',
-  '.header-start': {
-    display: 'flex',
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-});
+const headerStyles = css`
+  width: 100%;
+  box-shadow: 0px 4px 5px 0px rgba(0, 0, 0, 0.1);
+`;
+
+const headerWrappStyles = css`
+  display: flex;
+  max-width: 1280px;
+  height: 90px;
+  justify-content: space-between;
+  align-items: center;
+  margin: 0 auto;
+`;
+
+const headerStartStyles = css`
+  display: flex;
+  justify-content: center;
+  align-items: center;
+`;

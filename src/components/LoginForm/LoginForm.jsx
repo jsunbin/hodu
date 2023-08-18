@@ -1,19 +1,27 @@
 /** @jsxImportSource @emotion/react */
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useLocation } from 'react-router';
+import { useSetRecoilState } from 'recoil';
 import { css } from '@emotion/react';
+import { loginAPI } from '../../api/loginAPI';
+import { TokenAtom } from '../../recoil/TokenAtom';
+import { userLoginTypeAtom } from '../../recoil/LoginAtom';
 import Button from '../Button/Button';
-import { loginAPI } from '../../api/login';
 
 export default function LoginForm({ isSeller }) {
   const navigate = useNavigate();
+  const location = useLocation();
+  console.log(location);
   const idInputRef = React.createRef();
   const passwordInputRef = React.createRef();
+  const setAccessToken = useSetRecoilState(TokenAtom);
+  const setUserLoginType = useSetRecoilState(userLoginTypeAtom);
   const [id, setId] = useState('');
   const [password, setPassword] = useState('');
-  const [token, setToken] = useState('');
-  const [userType, setUserType] = useState('');
   const [loginError, setLoginError] = useState('');
+
+  const from = location?.state?.redirectedFrom?.pathname || '/';
 
   // 아이디, 비밀번호 데이터 관리
   const handleData = event => {
@@ -45,16 +53,10 @@ export default function LoginForm({ isSeller }) {
   const login = async props => {
     try {
       const data = await loginAPI(props);
+      setAccessToken(data.data.token);
+      setUserLoginType(data.data.user_type === 'SELLER' ? true : false);
 
-      const newToken = data.data.token;
-      const newUserType = data.data.user_type;
-      setToken(newToken);
-      setUserType(newUserType);
-      localStorage.setItem('token', newToken);
-      localStorage.setItem('id', id);
-      localStorage.setItem('userType', newUserType);
-
-      navigate(-1);
+      navigate(from);
     } catch (error) {
       if (error.response.status === 401) {
         const errorMessage = error.response.data?.FAIL_Message;
