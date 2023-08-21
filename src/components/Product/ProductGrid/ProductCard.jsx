@@ -3,21 +3,23 @@ import React from 'react';
 import { css } from '@emotion/react';
 import Price from '../../Price/Price';
 
-export default function ProductCard() {
+export default function ProductCard({ item }) {
+  const price = item.price.toLocaleString();
+
   return (
     <article css={articleStyle} className="product-card">
       <a
-        href="https://www.naver.com/"
+        href={`/product/${item.product_id}`}
         className="product-link"
         rel="noreferrer"
       >
         <div css={productImgStyle} className="product-img">
-          <img src="https://picsum.photos/380" alt="상품 이름" />
+          <img src={item.image} alt={item.product_name} />
         </div>
         <div css={productInfoStyle} className="product-info">
-          <span className="product-seller">우당탕탕 라이캣의 실험실</span>
-          <h3 className="product-name">Hack Your Life 개발자 노트북 파우치</h3>
-          <Price size="md">29,000</Price>
+          <span className="product-seller">{item.store_name}</span>
+          <h3 className="product-name">{item.product_name}</h3>
+          <Price size="md">{price}</Price>
         </div>
       </a>
     </article>

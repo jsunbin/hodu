@@ -3,22 +3,17 @@ import React from 'react';
 import { css } from '@emotion/react';
 import ProductCard from './ProductCard';
 
-export default function ProductGrid() {
+export default function ProductGrid({ items }) {
   return (
     <section css={sectionStyles} className="product-list-wrapper">
       <ul css={ulStyles} className="product-grid">
-        <li>
-          <ProductCard />
-        </li>
-        <li>
-          <ProductCard />
-        </li>
-        <li>
-          <ProductCard />
-        </li>
-        <li>
-          <ProductCard />
-        </li>
+        {items.map(item => {
+          return (
+            <li key={item.product_id}>
+              <ProductCard item={item} />
+            </li>
+          );
+        })}
       </ul>
     </section>
   );
