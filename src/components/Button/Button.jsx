@@ -1,6 +1,7 @@
 /** @jsxImportSource @emotion/react */
 import React from 'react';
 import { css } from '@emotion/react';
+import { Link } from 'react-router-dom';
 
 export default function Button({
   children,
@@ -10,7 +11,9 @@ export default function Button({
   color = 'default',
   disabled = false,
   icon = false,
+  href,
   width,
+  onClickEvent,
 }) {
   const buttonStyles = [
     commonStyles,
@@ -19,14 +22,24 @@ export default function Button({
     colorStyles[color],
     css({ width: width }),
   ];
-  return (
-    <button css={buttonStyles} type={type} disabled={disabled}>
+  return !href ? (
+    <button
+      css={buttonStyles}
+      type={type}
+      disabled={disabled}
+      onClick={onClickEvent}
+    >
       {children}
     </button>
+  ) : (
+    <Link css={buttonStyles} to={href}>
+      {children}
+    </Link>
   );
 }
 
 const commonStyles = css({
+  display: 'inline-block',
   cursor: 'pointer',
   border: 'none',
   color: 'inherit',
@@ -42,15 +55,17 @@ const sizeStyles = {
   sm: {
     minWidth: '80px',
     height: '40px',
+    lineHeight: '40px',
     background: '#21bf48',
     color: '#fff',
     fontSize: '16px',
     fontWeight: '500',
-    padding: '10px 25px',
+    // padding: '10px 25px',
   },
   ms: {
     width: '166px',
     height: '54px',
+    lineHeight: '54px',
     background: '#21bf48',
     color: '#fff',
     fontSize: '16px',
@@ -59,6 +74,7 @@ const sizeStyles = {
   md: {
     width: '480px',
     height: '60px',
+    lineHeight: '60px',
     background: '#21bf48',
     color: '#fff',
     fontSize: '18px',
@@ -71,6 +87,7 @@ const sizeStyles = {
   lg: {
     width: '220px',
     height: '68px',
+    lineHeight: '68px',
     background: '#21bf48',
     color: '#fff',
     fontSize: '24px',
