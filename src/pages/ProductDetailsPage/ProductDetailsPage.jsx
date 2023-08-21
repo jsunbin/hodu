@@ -1,82 +1,139 @@
 /** @jsxImportSource @emotion/react */
-import React from 'react';
+import React, { useState, useEffect } from 'react';
+import { useRecoilValue } from 'recoil';
 import { css } from '@emotion/react';
+import { productsDetailAPI } from '../../api/productsAPI';
+import { isUserSeller } from '../../recoil/LoginAtom';
+import { isLoginSelector, TokenAtom } from '../../recoil/TokenAtom';
+import { AmountAtom } from '../../recoil/AmountAtom';
 import Header from '../../components/common/Header/Header';
 import Footer from '../../components/common/Footer/Footer';
 import Price from '../../components/Price/Price';
 import Amount from '../../components/common/Amount/Amount';
 import Button from '../../components/Button/Button';
-import TabButton from '../../components/Button/TabButton';
+import TabMenu from '../../components/TabMenu/TabMenu';
 
 export default function ProductDetailsPage() {
+  const accessToken = useRecoilValue(TokenAtom);
+  const isLogin = useRecoilValue(isLoginSelector);
+  const isSeller = useRecoilValue(isUserSeller);
+  const amount = useRecoilValue(AmountAtom);
+  const [item, setItem] = useState([]);
+  const [price, setPrice] = useState('0');
+  const [deliveryMethod, setDeliveryMethod] = useState('택배배송');
+  const [deliveryFee, setDeliveryFee] = useState('무료배송');
+  const [isLoading, setIsLoading] = useState(false);
+  const [loadingError, setLoadingError] = useState(null);
+
+  const handleCartClick = () => {
+    console.log('장바구니 담기');
+    console.log('이동 확인 모달 띄우기');
+  };
+
+  const getProductsDetails = async productId => {
+    try {
+      setIsLoading(true);
+      setLoadingError(null);
+
+      const data = await productsDetailAPI(productId);
+
+      setItem(data.data);
+
+      console.log('상세: ', data);
+    } catch (error) {
+      setLoadingError(error);
+      console.error(error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    const productId = window.location.pathname.replace('/product/', '');
+
+    getProductsDetails(productId);
+  }, []);
+
+  useEffect(() => {
+    setPrice(item.price * amount);
+  }, [item, amount]);
+
+  useEffect(() => {
+    setDeliveryMethod(item.shipping_method === 'PARCEL' ? 'EMS' : '택배배송');
+    setDeliveryFee(item.shipping_fee === 0 ? '무료배송' : '2,500원');
+  }, [item]);
+
   return (
     <>
-      <Header />
-      <main className="main">
-        <section css={firstWrapDivStyles}>
-          <section css={imgSectionStyles}>
-            <img src="https://picsum.photos/600" alt="상품 이미지" />
-          </section>
-          <section>
-            <div css={productBasicInfoDivStyles}>
-              <span className="product-seller">백엔드 글로벌</span>
-              <h3 className="product-name">딥러닝 개발자 무릎 담요</h3>
-              <Price size="lg">17,500</Price>
-            </div>
-
-            <span css={deliveryOptionsSpanStyles}>택배배송 / 무료배송</span>
-            <Amount />
-            <div css={productTotalStyles}>
-              <span className="title">총 상품 금액</span>
-              <div css={orderDetailsStyles}>
-                <span css={orderAmountStyles} className="order-amount">
-                  총 수량 <strong>1</strong>개
-                </span>
-                <Price size="lg" color="#21BF48">
-                  17,500
-                </Price>
+      <Header isLogin={isLogin} isSeller={isSeller} />
+      {!isLoading ? (
+        <main css={mainStyles}>
+          <section css={firstWrapDivStyles}>
+            <section css={imgSectionStyles}>
+              <img src={item.image} alt={item.product_name} />
+            </section>
+            <section>
+              <div css={productBasicInfoDivStyles}>
+                <span className="product-seller">{item.store_name}</span>
+                <h3 className="product-name">{item.product_name}</h3>
+                <Price size="lg">{item.price}</Price>
               </div>
-            </div>
-            <div css={btnGroupsStyles}>
-              <Button size="md" width="416px">
-                바로구매
-              </Button>
-              <Button size="md" color="dark" width="200px">
-                장바구니
-              </Button>
-            </div>
-          </section>
-        </section>
 
-        <section css={productDetailsWrapStyles}>
-          <ul className="menu-list" role="menubar">
-            <li role="presentation">
-              <TabButton>상세정보</TabButton>
-            </li>
-            <li role="presentation">
-              <TabButton disabled>리뷰</TabButton>
-            </li>
-            <li role="presentation">
-              <TabButton disabled>Q&#38;A</TabButton>
-            </li>
-            <li role="presentation">
-              <TabButton disabled>반품&#47;교환정보</TabButton>
-            </li>
-          </ul>
-          <div className="menu-content"></div>
-        </section>
-      </main>
+              <span css={deliveryOptionsSpanStyles}>
+                {deliveryMethod} / {deliveryFee}
+              </span>
+              <Amount max={3} />
+              <div css={productTotalStyles}>
+                <span className="title">총 상품 금액</span>
+                <div css={orderDetailsStyles}>
+                  <span css={orderAmountStyles} className="order-amount">
+                    총 수량 <strong>{amount}</strong>개
+                  </span>
+                  <Price size="lg" color="#21BF48">
+                    {price}
+                  </Price>
+                </div>
+              </div>
+              <div css={btnGroupsStyles}>
+                <Button size="md" width="416px" href={'/payment'}>
+                  바로구매
+                </Button>
+                <Button
+                  size="md"
+                  color="dark"
+                  width="200px"
+                  onClickEvent={handleCartClick}
+                >
+                  장바구니
+                </Button>
+              </div>
+            </section>
+          </section>
+          <section css={productDetailsWrapStyles}>
+            <TabMenu />
+            <div className="menu-content"></div>
+          </section>
+        </main>
+      ) : (
+        <div>Loading...</div>
+      )}
       <Footer />
     </>
   );
 }
 
+const mainStyles = css`
+  width: 100%;
+  margin: 80px auto;
+`;
+
 const firstWrapDivStyles = css({
   display: 'flex',
-  width: '1280px',
+  maxWidth: '1280px',
   justifyContent: 'flex-start',
   gap: '50px',
-  margin: '80px 320px',
+  // margin: '80px 320px',
+  margin: '0 auto',
 });
 
 const imgSectionStyles = css({
@@ -155,7 +212,4 @@ const btnGroupsStyles = css({
 const productDetailsWrapStyles = css({
   maxWidth: '1280px',
   margin: '140px auto 360px',
-  li: {
-    float: 'left',
-  },
 });
