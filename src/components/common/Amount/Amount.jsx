@@ -1,10 +1,14 @@
 /** @jsxImportSource @emotion/react */
 import React, { useEffect, useState } from 'react';
 import { css } from '@emotion/react';
+import { useRecoilState } from 'recoil';
+import { AmountAtom } from '../../../recoil/AmountAtom';
 
-export default function Amount() {
-  const [amount, setAmount] = useState(1);
-  const [isDisabled, setIsDisabled] = useState(true);
+export default function Amount({ max }) {
+  // const [amount, setAmount] = useState(1);
+  const [isDisabledMinus, setIsDisabeldMinus] = useState(true);
+  const [isDisabledPlus, setIsDisabeldPlus] = useState(false);
+  const [amount, setAmount] = useRecoilState(AmountAtom);
 
   const minusClickHandler = () => {
     setAmount(prev => prev - 1);
@@ -17,9 +21,12 @@ export default function Amount() {
   useEffect(() => {
     console.log(amount);
     if (amount === 1) {
-      setIsDisabled(true);
+      setIsDisabeldMinus(true);
+      setIsDisabeldPlus(false);
+    } else if (amount >= max) {
+      setIsDisabeldPlus(true);
     } else if (amount > 1) {
-      setIsDisabled(false);
+      setIsDisabeldMinus(false);
     }
   }, [amount]);
 
@@ -30,7 +37,7 @@ export default function Amount() {
         type="button"
         className="btn-minus"
         onClick={minusClickHandler}
-        disabled={isDisabled}
+        disabled={isDisabledMinus}
       >
         <span className="a11y-hidden">수량 빼기</span>
         <svg
@@ -49,6 +56,7 @@ export default function Amount() {
         type="button"
         className="btn-plus"
         onClick={plusClickHandelr}
+        disabled={isDisabledPlus}
       >
         <span className="a11y-hidden">수량 추가</span>
         <svg

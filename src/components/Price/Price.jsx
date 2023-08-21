@@ -48,7 +48,9 @@ export default function Price({ children, size, className, color }) {
 
   return (
     <div>
-      <span css={priceStyles}>{children}</span>
+      <span css={priceStyles}>
+        {!!children ? children.toLocaleString() : '0'}
+      </span>
     </div>
   );
 }
