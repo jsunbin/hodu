@@ -25,6 +25,7 @@ export default function Amount({ max }) {
       setIsDisabeldPlus(false);
     } else if (amount >= max) {
       setIsDisabeldPlus(true);
+      setIsDisabeldMinus(false);
     } else if (amount > 1) {
       setIsDisabeldMinus(false);
     }
