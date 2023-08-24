@@ -1,29 +1,74 @@
 /** @jsxImportSource @emotion/react */
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { useRecoilState, useRecoilValue } from 'recoil';
+import { AmountAtom } from '../../../recoil/AmountAtom';
+import { AllCheckedAtom } from '../../../recoil/AllCheckedAtom';
+import { productsDetailAPI } from '../../../api/productsAPI';
 import { css } from '@emotion/react';
 import Amount from '../../common/Amount/Amount';
 import Button from '../../Button/Button';
+import DeliveryMethod from '../../DeliveryMethod/DeliveryMethod';
 
-export default function ProductTableItemCart() {
-  const [isChecked, setIsChecked] = useState(false);
+export default function ProductTableItemCart({
+  item,
+  checkList,
+  setCheckList,
+}) {
+  const isAllCheckedR = useRecoilValue(AllCheckedAtom);
+  const [product, setProduct] = useState([]);
+  const [isChecked, setIsChecked] = useState(!isAllCheckedR);
+  const [isLoading, setIsLoading] = useState(false);
+  const [loadingError, setLoadingError] = useState(null);
+  const [amount, setAmount] = useRecoilState(AmountAtom);
 
-  const handleCheckBoxClick = event => {
+  useEffect(() => {
+    setIsChecked(isAllCheckedR);
+  }, [isAllCheckedR]);
+
+  // 상품 체크박스 클릭 했을 때
+  const handleCheckBoxClick = (event, productId) => {
     event.preventDefault();
+
     setIsChecked(!isChecked);
   };
 
+  // 상품 상세 정보
+  const getProductsDetails = async () => {
+    try {
+      setIsLoading(true);
+      setLoadingError(null);
+
+      const data = await productsDetailAPI(item.product_id);
+
+      setProduct(data.data);
+      setAmount(item.quantity);
+    } catch (error) {
+      setLoadingError(error);
+      console.error(error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    getProductsDetails();
+  }, []);
+
   return (
-    <article css={productItemArticleStyles}>
+    <article css={productItemArticleStyles} data-id={item.product_id}>
       <div css={css({ margin: '0 30px' })}>
         <label>
           <input
-            title="모든 상품을 결제상품으로 설정"
+            title="상품을 결제상품으로 설정"
             type="checkbox"
             className="a11y-hidden"
             checked={isChecked}
             readOnly
           />
-          <div css={allOrderSelectStyles} onClick={handleCheckBoxClick}>
+          <div
+            css={allOrderSelectStyles}
+            onClick={event => handleCheckBoxClick(event, item.product_id)}
+          >
             <svg
               xmlns="http://www.w3.org/2000/svg"
               width="20"
@@ -40,20 +85,25 @@ export default function ProductTableItemCart() {
 
       <div css={productInfoDivStyles}>
         <a href="/#">
-          <img src="https://picsum.photos/160" alt="상품이미지" />
+          <img src={product.image} alt={product.product_name} />
         </a>
         <div css={productBasicInfoDivStyles}>
-          <span className="product-seller">백엔드 글로벌</span>
+          <span className="product-seller">{product.store_name}</span>
           <a href="/#">
-            <strong className="product-name">딥러닝 개발자 무릎 담요</strong>
+            <strong className="product-name">{product.product_name}</strong>
           </a>
-          <span className="product-unit-price">17,500원</span>
-          <span css={deliveryOptionsSpanStyles}>택배배송 / 무료배송</span>
+          <span className="product-unit-price">{product.price}원</span>
+          {/* <span css={deliveryOptionsSpanStyles}>택배배송 / 무료배송</span> */}
+          <DeliveryMethod
+            styles={deliveryOptionsSpanStyles}
+            shippingMethod={product.shipping_method}
+            shippingFee={product.shipping_fee}
+          />
         </div>
       </div>
 
       <div css={css({ margin: '0 48px' })}>
-        <Amount />
+        <Amount amountToSet={item.quantity} max={product.stock} />
       </div>
 
       <div css={productTotalPrice}>
@@ -75,12 +125,12 @@ export default function ProductTableItemCart() {
             <path
               d="M4.14258 18.2842L18.2847 4.14204"
               stroke="#C4C4C4"
-              stroke-width="2"
+              strokeWidth="2"
             />
             <path
               d="M18.1426 18.1421L4.00044 3.99996"
               stroke="#C4C4C4"
-              stroke-width="2"
+              strokeWidth="2"
             />
           </svg>
         </button>
@@ -121,10 +171,10 @@ const productBasicInfoDivStyles = css({
   fontFamily: 'Spoqa Han Sans Neo',
   fontWeight: '400',
   textAlign: 'left',
+  marginTop: '6px',
   '.product-seller': {
     color: '#767676',
     fontSize: '14px',
-    marginTop: '6px',
   },
   '.product-name': {
     display: 'block',
