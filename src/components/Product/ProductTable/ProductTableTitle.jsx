@@ -1,17 +1,35 @@
 /** @jsxImportSource @emotion/react */
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { useSetRecoilState } from 'recoil';
+import { AllCheckedAtom } from '../../../recoil/AllCheckedAtom';
 import { css } from '@emotion/react';
 
 export default function ProductTableTitle({
   page = 'cart',
   isCheckBox = true,
+  checkList,
+  setCheckList,
 }) {
   const [isChecked, setIsChecked] = useState(false);
+  const setIsAllCheckedR = useSetRecoilState(AllCheckedAtom);
 
   const handleCheckBoxClick = event => {
     event.preventDefault();
     setIsChecked(!isChecked);
+    setIsAllCheckedR(!isChecked);
+
+    const updatedCheckList = checkList.map(item => ({
+      ...item,
+      isChecked: !isChecked,
+    }));
+
+    setCheckList(updatedCheckList);
   };
+
+  useEffect(() => {
+    const isAllChecked = checkList.every(item => item.isChecked);
+    setIsChecked(isAllChecked);
+  }, [checkList]);
 
   const tabTitleList = {
     cart: {

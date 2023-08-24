@@ -30,6 +30,12 @@ export default function ProductTableItemCart({
     event.preventDefault();
 
     setIsChecked(!isChecked);
+
+    setCheckList(prevList =>
+      prevList.map(item =>
+        item.id === productId ? { ...item, isChecked: !item.isChecked } : item,
+      ),
+    );
   };
 
   // 상품 상세 정보

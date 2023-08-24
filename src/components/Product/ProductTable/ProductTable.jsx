@@ -1,25 +1,35 @@
 /** @jsxImportSource @emotion/react */
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { css } from '@emotion/react';
 import ProductTableTitle from './ProductTableTitle';
-import ProductTableItemCart from './ProductTableItemCart';
-import ProductTableItemPayment from './ProductTableItemPayment';
+import ProductTableTbody from './ProductTableTbody';
 
-export default function ProductTable({ page = 'cart', isCheckBox = true }) {
+export default function ProductTable({
+  page = 'cart',
+  isCheckBox = true,
+  items,
+}) {
+  const [checkList, setCheckList] = useState([]);
+
+  useEffect(() => {
+    setCheckList(
+      items.map(item => ({ id: item.product_id, isChecked: false })),
+    );
+  }, []);
+
   return (
     <table css={tableStyles({ page })} className={`${page}-table`}>
-      <ProductTableTitle page={page} isCheckBox={isCheckBox} />
-      <tbody css={tbodyStyles({ page })}>
-        <tr css={trStyles({ page })}>
-          {page === 'cart' ? (
-            <td colSpan={5}>
-              <ProductTableItemCart />
-            </td>
-          ) : (
-            <ProductTableItemPayment />
-          )}
-        </tr>
-      </tbody>
+      <ProductTableTitle
+        page={page}
+        isCheckBox={isCheckBox}
+        checkList={checkList}
+        setCheckList={setCheckList}
+      />
+      <ProductTableTbody
+        items={items}
+        checkList={checkList}
+        setCheckList={setCheckList}
+      />
     </table>
   );
 }
@@ -29,30 +39,4 @@ const tableStyles = props => css`
   text-align: center;
   border-collapse: separate;
   border-spacing: ${props.page === 'cart' ? '0 35px' : '0 16px'};
-`;
-
-const tbodyStyles = props => css`
-  border-collapse: separate;
-  border-spacing: ${props.page === 'cart' ? '0 10px' : '0 16px'};
-  td {
-    vertical-align: middle;
-  }
-`;
-
-const trStyles = props => css`
-  position: relative;
-
-  ${props.page === 'order' &&
-  css`
-    ::after {
-      content: '';
-      display: block;
-      width: 100%;
-      height: 1px;
-      background: #c4c4c4;
-      position: absolute;
-      bottom: 0;
-      left: 0;
-    }
-  `}
 `;
