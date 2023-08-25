@@ -9,6 +9,7 @@ export default function Amount({
   max,
   setIsDifferent = () => {},
   setIsChanged = () => {},
+  setAmountG = () => {},
 }) {
   const [amount, setAmount] = useState(min);
   const setAmountAtom = useSetRecoilState(AmountAtom);
@@ -43,6 +44,7 @@ export default function Amount({
   useEffect(() => {
     setAmountAction();
     setAmountAtom(amount);
+    setAmountG(amount);
   }, [amount]);
 
   useEffect(() => {

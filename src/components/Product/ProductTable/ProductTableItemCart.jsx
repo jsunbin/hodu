@@ -20,7 +20,6 @@ export default function ProductTableItemCart({
   checkList,
   setCheckList,
 }) {
-  console.log(item);
   const accessToken = useRecoilValue(TokenAtom);
   const isAllCheckedR = useRecoilValue(AllCheckedAtom);
   const [product, setProduct] = useState([]);
@@ -34,6 +33,14 @@ export default function ProductTableItemCart({
 
   const setOpenModal = useSetRecoilState(openModalSelector);
   const setCartItemToDelete = useSetRecoilState(cartItemToDeleteAtom);
+
+  const [amountG, setAmountG] = useState(0);
+
+  const productTotalPrice = () => {
+    const { price } = product;
+
+    return price * amountG;
+  };
 
   // 장바구니 삭제 클릭
   const handleDeleteClick = (event, cartItemId) => {
@@ -154,7 +161,9 @@ export default function ProductTableItemCart({
             <Link to={`/product/${item.product_id}`}>
               <strong className="product-name">{product.product_name}</strong>
             </Link>
-            <span className="product-unit-price">{product.price}원</span>
+            <span className="product-unit-price">
+              {parseInt(product.price).toLocaleString()}원
+            </span>
             {/* <span css={deliveryOptionsSpanStyles}>택배배송 / 무료배송</span> */}
             <DeliveryMethod
               styles={deliveryOptionsSpanStyles}
@@ -176,6 +185,7 @@ export default function ProductTableItemCart({
                 max={product.stock}
                 setIsDifferent={setIsDifferent}
                 setIsChanged={setIsChanged}
+                setAmountG={setAmountG}
               />
               {isDifferent && (
                 <>
@@ -227,8 +237,8 @@ export default function ProductTableItemCart({
           )}
         </div>
 
-        <div css={productTotalPrice}>
-          <span>17,500원</span>
+        <div css={productTotalPriceStyles}>
+          <span>{productTotalPrice().toLocaleString()}원</span>
           <Button size="sm" width="130px">
             주문하기
           </Button>
@@ -328,7 +338,7 @@ const deliveryOptionsSpanStyles = css({
   marginTop: '40px',
 });
 
-const productTotalPrice = css({
+const productTotalPriceStyles = css({
   display: 'flex',
   flexDirection: 'column',
   justifyContent: 'center',
