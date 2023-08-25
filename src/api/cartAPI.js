@@ -52,20 +52,21 @@ export const addCartAPI = async ({
 };
 
 // 장바구니 수량 수정
-export const amountCartAPI = async ({
+export const amountCartAPI = async (
   accessToken,
   cartItemId,
   productId,
-  quantity = 0,
-  isActive = false,
-}) => {
+  quantity,
+  isActive = true,
+) => {
   try {
+    console.log(accessToken, cartItemId, productId, quantity, isActive);
     const response = await axios.put(
-      `https://openmarket.weniv.co.kr/cart/${cartItemId}`,
+      `https://openmarket.weniv.co.kr/cart/${cartItemId}/`,
       {
         product_id: productId,
         quantity: quantity,
-        is_active: isActive,
+        is_active: isActive, // 장바구니 내 상품 활성화 버튼, 같이 보내지 않으면 False
       },
       {
         headers: {
@@ -73,7 +74,6 @@ export const amountCartAPI = async ({
         },
       },
     );
-
     return response;
   } catch (error) {
     throw error;

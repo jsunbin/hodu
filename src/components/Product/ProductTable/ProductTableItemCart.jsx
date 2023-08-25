@@ -1,6 +1,6 @@
 /** @jsxImportSource @emotion/react */
 import React, { useState, useEffect } from 'react';
-import { useRecoilState, useRecoilValue } from 'recoil';
+import { useRecoilState, useRecoilValue, useSetRecoilState } from 'recoil';
 import { AmountAtom } from '../../../recoil/AmountAtom';
 import { AllCheckedAtom } from '../../../recoil/AllCheckedAtom';
 import { productsDetailAPI } from '../../../api/productsAPI';
@@ -8,18 +8,27 @@ import { css } from '@emotion/react';
 import Amount from '../../common/Amount/Amount';
 import Button from '../../Button/Button';
 import DeliveryMethod from '../../DeliveryMethod/DeliveryMethod';
+import { Link } from 'react-router-dom';
+import { amountCartAPI } from '../../../api/cartAPI';
+import { TokenAtom } from '../../../recoil/TokenAtom';
+import NoButtonModal from '../../Modal/NoButtonMoal/NoButtonModal';
 
 export default function ProductTableItemCart({
   item,
   checkList,
   setCheckList,
 }) {
+  console.log(item);
+  const accessToken = useRecoilValue(TokenAtom);
   const isAllCheckedR = useRecoilValue(AllCheckedAtom);
   const [product, setProduct] = useState([]);
   const [isChecked, setIsChecked] = useState(!isAllCheckedR);
   const [isLoading, setIsLoading] = useState(false);
   const [loadingError, setLoadingError] = useState(null);
   const [amount, setAmount] = useRecoilState(AmountAtom);
+
+  const [isDifferent, setIsDifferent] = useState(false);
+  const [isChanged, setIsChanged] = useState(false);
 
   useEffect(() => {
     setIsChecked(isAllCheckedR);
@@ -36,6 +45,30 @@ export default function ProductTableItemCart({
         item.id === productId ? { ...item, isChecked: !item.isChecked } : item,
       ),
     );
+  };
+
+  const [isNoButtonModalVisible, setIsNoButtonModalVisible] = useState(false);
+
+  // 주문수정 클릭 했을 때
+  const handleOrderChangeClick = async () => {
+    try {
+      const data = await amountCartAPI(
+        accessToken,
+        item.cart_item_id,
+        item.product_id,
+        amount,
+      );
+
+      setIsChanged(false);
+
+      // 주문수정 후, 1.5초 뒤에 NoButtomModal 닫기
+      setIsNoButtonModalVisible(true);
+      setTimeout(() => {
+        setIsNoButtonModalVisible(false);
+      }, 1500);
+    } catch (error) {
+      console.error(error);
+    }
   };
 
   // 상품 상세 정보
@@ -61,87 +94,154 @@ export default function ProductTableItemCart({
   }, []);
 
   return (
-    <article css={productItemArticleStyles} data-id={item.product_id}>
-      <div css={css({ margin: '0 30px' })}>
-        <label>
-          <input
-            title="상품을 결제상품으로 설정"
-            type="checkbox"
-            className="a11y-hidden"
-            checked={isChecked}
-            readOnly
-          />
-          <div
-            css={allOrderSelectStyles}
-            onClick={event => handleCheckBoxClick(event, item.product_id)}
-          >
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              width="20"
-              height="20"
-              viewBox="0 0 20 20"
-              fill="none"
+    !isLoading && (
+      <article css={productItemArticleStyles} data-id={item.product_id}>
+        <div css={css({ margin: '0 30px' })}>
+          <label>
+            <input
+              title="상품을 결제상품으로 설정"
+              type="checkbox"
+              className="a11y-hidden"
+              checked={isChecked}
+              readOnly
+            />
+            <div
+              css={allOrderSelectStyles}
+              onClick={event => handleCheckBoxClick(event, item.product_id)}
             >
-              <circle cx="10" cy="10" r="9" stroke="#21BF48" strokeWidth="2" />
-              {isChecked && <circle cx="10" cy="10" r="6" fill="#21BF48" />}
-            </svg>
-          </div>
-        </label>
-      </div>
-
-      <div css={productInfoDivStyles}>
-        <a href="/#">
-          <img src={product.image} alt={product.product_name} />
-        </a>
-        <div css={productBasicInfoDivStyles}>
-          <span className="product-seller">{product.store_name}</span>
-          <a href="/#">
-            <strong className="product-name">{product.product_name}</strong>
-          </a>
-          <span className="product-unit-price">{product.price}원</span>
-          {/* <span css={deliveryOptionsSpanStyles}>택배배송 / 무료배송</span> */}
-          <DeliveryMethod
-            styles={deliveryOptionsSpanStyles}
-            shippingMethod={product.shipping_method}
-            shippingFee={product.shipping_fee}
-          />
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                width="20"
+                height="20"
+                viewBox="0 0 20 20"
+                fill="none"
+              >
+                <circle
+                  cx="10"
+                  cy="10"
+                  r="9"
+                  stroke="#21BF48"
+                  strokeWidth="2"
+                />
+                {isChecked && <circle cx="10" cy="10" r="6" fill="#21BF48" />}
+              </svg>
+            </div>
+          </label>
         </div>
-      </div>
 
-      <div css={css({ margin: '0 48px' })}>
-        <Amount amountToSet={item.quantity} max={product.stock} />
-      </div>
-
-      <div css={productTotalPrice}>
-        <span>17,500원</span>
-        <Button size="sm" width="130px">
-          주문하기
-        </Button>
-      </div>
-
-      <div css={itemDeleteStyles}>
-        <button type="button">
-          <svg
-            width="22"
-            height="22"
-            viewBox="0 0 22 22"
-            fill="none"
-            xmlns="http://www.w3.org/2000/svg"
-          >
-            <path
-              d="M4.14258 18.2842L18.2847 4.14204"
-              stroke="#C4C4C4"
-              strokeWidth="2"
+        <div css={productInfoDivStyles}>
+          <Link to={`/product/${item.product_id}`}>
+            <img src={product.image} alt={product.product_name} />
+          </Link>
+          <div css={productBasicInfoDivStyles}>
+            <span className="product-seller">{product.store_name}</span>
+            <Link to={`/product/${item.product_id}`}>
+              <strong className="product-name">{product.product_name}</strong>
+            </Link>
+            <span className="product-unit-price">{product.price}원</span>
+            {/* <span css={deliveryOptionsSpanStyles}>택배배송 / 무료배송</span> */}
+            <DeliveryMethod
+              styles={deliveryOptionsSpanStyles}
+              shippingMethod={product.shipping_method}
+              shippingFee={product.shipping_fee}
             />
-            <path
-              d="M18.1426 18.1421L4.00044 3.99996"
-              stroke="#C4C4C4"
-              strokeWidth="2"
-            />
-          </svg>
-        </button>
-      </div>
-    </article>
+          </div>
+        </div>
+
+        <div css={css({ margin: '0 48px', position: 'relative' })}>
+          {product.stock === 0 ? (
+            <Button size="md" width="150px" disabled>
+              품절
+            </Button>
+          ) : (
+            <>
+              <Amount
+                min={item.quantity}
+                max={product.stock}
+                setIsDifferent={setIsDifferent}
+                setIsChanged={setIsChanged}
+              />
+              {isDifferent && (
+                <>
+                  <strong
+                    css={css`
+                      position: absolute;
+                      display: block;
+                      color: #eb5757;
+                      font-size: 11px;
+                      font-weight: bold;
+                      bottom: -1.5rem;
+                      left: 0;
+                    `}
+                  >
+                    최대 주문 가능 수량은 {product.stock}개 입니다.
+                  </strong>
+                </>
+              )}
+              {isChanged && (
+                <button
+                  type="button"
+                  onClick={handleOrderChangeClick}
+                  css={css`
+                    position: absolute;
+                    bottom: ${isDifferent ? '-4rem' : '-3.5em'};
+                    left: 50%;
+                    transform: translateX(-50%);
+                    display: block;
+                    margin-top: 3px;
+                    padding: 0 12px;
+                    line-height: 26px;
+                    color: #424242;
+                    border-radius: 4px;
+                    border: 1px solid #d5d9dc;
+                    color: #333333;
+                    -ms-flex-item-align: start;
+                    align-self: start;
+                    cursor: pointer;
+                    outline: none;
+                    font-size: 12px;
+                    background: #fff;
+                  `}
+                >
+                  주문수정
+                </button>
+              )}
+              {isNoButtonModalVisible && <NoButtonModal />}
+            </>
+          )}
+        </div>
+
+        <div css={productTotalPrice}>
+          <span>17,500원</span>
+          <Button size="sm" width="130px">
+            주문하기
+          </Button>
+        </div>
+
+        <div css={itemDeleteStyles}>
+          <button type="button">
+            <svg
+              width="22"
+              height="22"
+              viewBox="0 0 22 22"
+              fill="none"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <path
+                d="M4.14258 18.2842L18.2847 4.14204"
+                stroke="#C4C4C4"
+                strokeWidth="2"
+              />
+              <path
+                d="M18.1426 18.1421L4.00044 3.99996"
+                stroke="#C4C4C4"
+                strokeWidth="2"
+              />
+            </svg>
+          </button>
+        </div>
+      </article>
+    )
   );
 }
 
