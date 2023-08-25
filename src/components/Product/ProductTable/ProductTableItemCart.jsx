@@ -1,8 +1,11 @@
 /** @jsxImportSource @emotion/react */
 import React, { useState, useEffect } from 'react';
 import { useRecoilState, useRecoilValue, useSetRecoilState } from 'recoil';
+import { TokenAtom } from '../../../recoil/TokenAtom';
 import { AmountAtom } from '../../../recoil/AmountAtom';
 import { AllCheckedAtom } from '../../../recoil/AllCheckedAtom';
+import { openModalSelector } from '../../../recoil/ModalAtom';
+import { cartItemToDeleteAtom } from '../../../recoil/CartItemToDeleteAtom';
 import { productsDetailAPI } from '../../../api/productsAPI';
 import { css } from '@emotion/react';
 import Amount from '../../common/Amount/Amount';
@@ -10,7 +13,6 @@ import Button from '../../Button/Button';
 import DeliveryMethod from '../../DeliveryMethod/DeliveryMethod';
 import { Link } from 'react-router-dom';
 import { amountCartAPI } from '../../../api/cartAPI';
-import { TokenAtom } from '../../../recoil/TokenAtom';
 import NoButtonModal from '../../Modal/NoButtonMoal/NoButtonModal';
 
 export default function ProductTableItemCart({
@@ -29,6 +31,16 @@ export default function ProductTableItemCart({
 
   const [isDifferent, setIsDifferent] = useState(false);
   const [isChanged, setIsChanged] = useState(false);
+
+  const setOpenModal = useSetRecoilState(openModalSelector);
+  const setCartItemToDelete = useSetRecoilState(cartItemToDeleteAtom);
+
+  // 장바구니 삭제 클릭
+  const handleDeleteClick = (event, cartItemId) => {
+    event.preventDefault();
+    setOpenModal();
+    setCartItemToDelete(cartItemId);
+  };
 
   useEffect(() => {
     setIsChecked(isAllCheckedR);
@@ -95,7 +107,11 @@ export default function ProductTableItemCart({
 
   return (
     !isLoading && (
-      <article css={productItemArticleStyles} data-id={item.product_id}>
+      <article
+        css={productItemArticleStyles}
+        data-id={item.product_id}
+        data-cart-item-id={item.product_item_id}
+      >
         <div css={css({ margin: '0 30px' })}>
           <label>
             <input
@@ -219,7 +235,10 @@ export default function ProductTableItemCart({
         </div>
 
         <div css={itemDeleteStyles}>
-          <button type="button">
+          <button
+            type="button"
+            onClick={event => handleDeleteClick(event, item.cart_item_id)}
+          >
             <svg
               width="22"
               height="22"

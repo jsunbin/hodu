@@ -1,14 +1,21 @@
 /** @jsxImportSource @emotion/react */
 import React, { useState, useEffect } from 'react';
-import { useRecoilValue } from 'recoil';
+import { useRecoilValue, useSetRecoilState } from 'recoil';
 import { isLoginSelector, TokenAtom } from '../../recoil/TokenAtom';
 import { isUserSeller } from '../../recoil/LoginAtom';
-import { cartListAPI } from '../../api/cartAPI';
+import { cartItemToDeleteAtom } from '../../recoil/CartItemToDeleteAtom';
+import {
+  closeModalSelector,
+  modalStateAtom,
+  openModalSelector,
+} from '../../recoil/ModalAtom';
+import { cartListAPI, deleteCartItemAPI } from '../../api/cartAPI';
 import { css } from '@emotion/react';
 import Header from '../../components/common/Header/Header';
 import ProductTable from '../../components/Product/ProductTable/ProductTable';
 import OrderTotalBox from '../../components/OrderTotalBox/OrderTotalBox';
 import Button from '../../components/Button/Button';
+import Modal from '../../components/Modal/Modal';
 import Footer from '../../components/common/Footer/Footer';
 
 export default function CartPage() {
@@ -18,6 +25,25 @@ export default function CartPage() {
   const [items, setItems] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
   const [loadingError, setLoadingError] = useState(null);
+  const modalState = useRecoilValue(modalStateAtom);
+  const setOpenModal = useSetRecoilState(openModalSelector);
+  const setCloseModal = useSetRecoilState(closeModalSelector);
+  const cartItemIdToDelete = useRecoilValue(cartItemToDeleteAtom);
+
+  const handleDeleteClick = () => {
+    setCloseModal();
+    deleteCartItem();
+
+    setItems(prev => prev.filter(v => v.cart_item_id !== cartItemIdToDelete));
+  };
+
+  const deleteCartItem = async () => {
+    try {
+      const data = await deleteCartItemAPI(accessToken, cartItemIdToDelete);
+    } catch (error) {
+      console.error(error);
+    }
+  };
 
   const getCartList = async () => {
     try {
@@ -51,6 +77,11 @@ export default function CartPage() {
               <Button size="lg">주문하기</Button>
             </div>
           </div>
+          {modalState.isOpen && (
+            <Modal yesOnClickEvent={handleDeleteClick}>
+              상품을 삭제하시겠습니까?
+            </Modal>
+          )}
         </main>
       ) : (
         <div>Loading...</div>

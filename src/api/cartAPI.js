@@ -79,3 +79,21 @@ export const amountCartAPI = async (
     throw error;
   }
 };
+
+// 장바구니 상품 개별 삭제
+export const deleteCartItemAPI = async (accessToken, cartItemId) => {
+  try {
+    const response = await axios.delete(
+      `https://openmarket.weniv.co.kr/cart/${cartItemId}/`,
+      {
+        headers: {
+          Authorization: `JWT ${accessToken}`,
+        },
+      },
+    );
+
+    return response;
+  } catch (error) {
+    throw error;
+  }
+};
