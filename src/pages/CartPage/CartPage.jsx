@@ -71,11 +71,19 @@ export default function CartPage() {
         <main>
           <div css={contentDivStyles}>
             <h2 css={h2Styles}>장바구니</h2>
+
             <ProductTable items={items} />
-            <OrderTotalBox />
-            <div css={buttonWrapDivStyles}>
-              <Button size="lg">주문하기</Button>
-            </div>
+
+            {items.length !== 0 ? (
+              <>
+                <OrderTotalBox />
+                <div css={buttonWrapDivStyles}>
+                  <Button size="lg">주문하기</Button>
+                </div>
+              </>
+            ) : (
+              ''
+            )}
           </div>
           {modalState.isOpen && (
             <Modal yesOnClickEvent={handleDeleteClick}>

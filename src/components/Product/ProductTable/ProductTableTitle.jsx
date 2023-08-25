@@ -27,8 +27,12 @@ export default function ProductTableTitle({
   };
 
   useEffect(() => {
-    const isAllChecked = checkList.every(item => item.isChecked);
-    setIsChecked(isAllChecked);
+    if (checkList.length !== 0) {
+      const isAllChecked = checkList.every(item => item.isChecked);
+      setIsChecked(isAllChecked);
+    } else {
+      setIsChecked(false);
+    }
   }, [checkList]);
 
   const tabTitleList = {
