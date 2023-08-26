@@ -1,26 +1,112 @@
 /** @jsxImportSource @emotion/react */
-import React from 'react';
+import React, { useState, useEffect } from 'react';
+import { useRecoilValue, useSetRecoilState } from 'recoil';
+import { isLoginSelector, TokenAtom } from '../../recoil/TokenAtom';
+import { isUserSeller } from '../../recoil/LoginAtom';
+import { cartItemToDeleteAtom } from '../../recoil/CartItemToDeleteAtom';
+import {
+  closeModalSelector,
+  modalStateAtom,
+  openModalSelector,
+} from '../../recoil/ModalAtom';
+import { cartListAPI, deleteCartItemAPI } from '../../api/cartAPI';
 import { css } from '@emotion/react';
 import Header from '../../components/common/Header/Header';
 import ProductTable from '../../components/Product/ProductTable/ProductTable';
 import OrderTotalBox from '../../components/OrderTotalBox/OrderTotalBox';
 import Button from '../../components/Button/Button';
+import Modal from '../../components/Modal/Modal';
 import Footer from '../../components/common/Footer/Footer';
 
 export default function CartPage() {
+  const accessToken = useRecoilValue(TokenAtom);
+  const isLogin = useRecoilValue(isLoginSelector);
+  const isSeller = useRecoilValue(isUserSeller);
+  const [items, setItems] = useState([]);
+  const [isLoading, setIsLoading] = useState(false);
+  const [loadingError, setLoadingError] = useState(null);
+  const modalState = useRecoilValue(modalStateAtom);
+  const setOpenModal = useSetRecoilState(openModalSelector);
+  const setCloseModal = useSetRecoilState(closeModalSelector);
+  const cartItemIdToDelete = useRecoilValue(cartItemToDeleteAtom);
+  const [isAmountChanged, setIsAmountChanged] = useState(false);
+
+  const handleDeleteClick = () => {
+    setCloseModal();
+    deleteCartItem();
+
+    setItems(prev => prev.filter(v => v.cart_item_id !== cartItemIdToDelete));
+  };
+
+  const deleteCartItem = async () => {
+    try {
+      const data = await deleteCartItemAPI(accessToken, cartItemIdToDelete);
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
+  const getCartList = async () => {
+    try {
+      setIsLoading(true);
+      setLoadingError(null);
+      const data = await cartListAPI(accessToken);
+      const { results } = data.data;
+      setItems(results);
+    } catch (error) {
+      setLoadingError(error);
+      console.error(error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    getCartList();
+  }, []);
+
+  const [checkList, setCheckList] = useState([]);
+
   return (
     <>
-      <Header />
-      <main>
-        <div css={contentDivStyles}>
-          <h2 css={h2Styles}>장바구니</h2>
-          <ProductTable />
-          <OrderTotalBox />
-          <div css={buttonWrapDivStyles}>
-            <Button size="lg">주문하기</Button>
+      <Header isLogin={isLogin} isSeller={isSeller} />
+      {!isLoading ? (
+        <main>
+          <div css={contentDivStyles}>
+            <h2 css={h2Styles}>장바구니</h2>
+
+            <ProductTable
+              items={items}
+              checkList={checkList}
+              setCheckList={setCheckList}
+              isAmountChanged={isAmountChanged}
+              setIsAmountChanged={setIsAmountChanged}
+            />
+
+            {items.length !== 0 ? (
+              <>
+                <OrderTotalBox
+                  checkList={checkList}
+                  isAmountChanged={isAmountChanged}
+                />
+                <div css={buttonWrapDivStyles}>
+                  <Button size="lg">주문하기</Button>
+                </div>
+              </>
+            ) : (
+              ''
+            )}
           </div>
-        </div>
-      </main>
+          {modalState.isOpen && (
+            <Modal yesOnClickEvent={handleDeleteClick}>
+              상품을 삭제하시겠습니까?
+            </Modal>
+          )}
+        </main>
+      ) : (
+        <div>Loading...</div>
+      )}
+
       <Footer />
     </>
   );

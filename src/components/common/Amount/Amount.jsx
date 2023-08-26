@@ -1,35 +1,58 @@
 /** @jsxImportSource @emotion/react */
 import React, { useEffect, useState } from 'react';
 import { css } from '@emotion/react';
-import { useRecoilState } from 'recoil';
+import { useSetRecoilState } from 'recoil';
 import { AmountAtom } from '../../../recoil/AmountAtom';
 
-export default function Amount({ max }) {
-  // const [amount, setAmount] = useState(1);
-  const [isDisabledMinus, setIsDisabeldMinus] = useState(true);
+export default function Amount({
+  min = 1,
+  max,
+  setIsDifferent = () => {},
+  setIsChanged = () => {},
+  setAmountG = () => {},
+}) {
+  const [amount, setAmount] = useState(min);
+  const setAmountAtom = useSetRecoilState(AmountAtom);
+  const [isDisabledMinus, setIsDisabeldMinus] = useState(false);
   const [isDisabledPlus, setIsDisabeldPlus] = useState(false);
-  const [amount, setAmount] = useRecoilState(AmountAtom);
 
   const minusClickHandler = () => {
     setAmount(prev => prev - 1);
+    setIsChanged(true);
   };
 
   const plusClickHandelr = () => {
     setAmount(prev => prev + 1);
+    setIsChanged(true);
+  };
+
+  const setAmountAction = () => {
+    if (amount <= 1) {
+      setIsDisabeldMinus(true);
+      setIsDisabeldPlus(false);
+      setIsDifferent(false);
+    } else if (amount < max) {
+      setIsDisabeldMinus(false);
+      setIsDisabeldPlus(false);
+      setIsDifferent(false);
+    } else if (amount >= max) {
+      setIsDisabeldMinus(false);
+      setIsDisabeldPlus(true);
+    }
   };
 
   useEffect(() => {
-    console.log(amount);
-    if (amount === 1) {
-      setIsDisabeldMinus(true);
-      setIsDisabeldPlus(false);
-    } else if (amount >= max) {
-      setIsDisabeldPlus(true);
-      setIsDisabeldMinus(false);
-    } else if (amount > 1) {
-      setIsDisabeldMinus(false);
-    }
+    setAmountAction();
+    setAmountAtom(amount);
+    setAmountG(amount);
   }, [amount]);
+
+  useEffect(() => {
+    if (min > max) {
+      setIsDifferent(true);
+      setAmount(max);
+    }
+  }, []);
 
   return (
     <div css={amountDivStyles}>

@@ -1,58 +1,99 @@
 /** @jsxImportSource @emotion/react */
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { css } from '@emotion/react';
 import ProductTableTitle from './ProductTableTitle';
-import ProductTableItemCart from './ProductTableItemCart';
-import ProductTableItemPayment from './ProductTableItemPayment';
+import ProductTableTbody from './ProductTableTbody';
 
-export default function ProductTable({ page = 'cart', isCheckBox = true }) {
+export default function ProductTable({
+  page = 'cart',
+  isCheckBox = true,
+  items,
+  checkList,
+  setCheckList,
+  isAmountChanged,
+  setIsAmountChanged,
+}) {
+  // const [checkList, setCheckList] = useState([]);
+
+  console.log('장바구니 리스트: ', items);
+  console.log('체크리스트: ', checkList);
+
+  useEffect(() => {
+    setCheckList(
+      items.map(item => ({
+        id: item.product_id,
+        isChecked: false,
+        price: 0 * item.quantity,
+        deliveryFee: 0,
+      })),
+    );
+  }, []);
+
   return (
     <table css={tableStyles({ page })} className={`${page}-table`}>
-      <ProductTableTitle page={page} isCheckBox={isCheckBox} />
-      <tbody css={tbodyStyles({ page })}>
-        <tr css={trStyles({ page })}>
-          {page === 'cart' ? (
+      <ProductTableTitle
+        page={page}
+        isCheckBox={isCheckBox}
+        checkList={checkList}
+        setCheckList={setCheckList}
+      />
+      {items.length !== 0 ? (
+        <ProductTableTbody
+          items={items}
+          checkList={checkList}
+          setCheckList={setCheckList}
+          isAmountChanged={isAmountChanged}
+          setIsAmountChanged={setIsAmountChanged}
+        />
+      ) : (
+        <tbody>
+          <tr>
             <td colSpan={5}>
-              <ProductTableItemCart />
+              <div css={noItemDivStyles}>
+                <strong css={strongStyles}>
+                  장바구니에 담긴 상품이 없습니다.
+                </strong>
+                <span css={noItemSpanStyles}>
+                  원하는 상품을 장바구니에 담아보세요!
+                </span>
+              </div>
             </td>
-          ) : (
-            <ProductTableItemPayment />
-          )}
-        </tr>
-      </tbody>
+          </tr>
+        </tbody>
+      )}
     </table>
   );
 }
+
+const noItemDivStyles = css`
+  width: 100%;
+  height: 50vh;
+`;
+
+const strongStyles = css`
+  display: block;
+  color: #000;
+  font-family: Spoqa Han Sans Neo;
+  font-size: 18px;
+  font-style: normal;
+  font-weight: 700;
+  line-height: normal;
+`;
+
+const noItemSpanStyles = css`
+  display: block;
+  color: var(--767676, #767676);
+  font-family: Spoqa Han Sans Neo;
+  font-size: 14px;
+  font-style: normal;
+  font-weight: 400;
+  line-height: normal;
+  margin-top: 16px;
+`;
 
 const tableStyles = props => css`
   width: 1280px;
   text-align: center;
   border-collapse: separate;
   border-spacing: ${props.page === 'cart' ? '0 35px' : '0 16px'};
-`;
-
-const tbodyStyles = props => css`
-  border-collapse: separate;
-  border-spacing: ${props.page === 'cart' ? '0 10px' : '0 16px'};
-  td {
-    vertical-align: middle;
-  }
-`;
-
-const trStyles = props => css`
-  position: relative;
-
-  ${props.page === 'order' &&
-  css`
-    ::after {
-      content: '';
-      display: block;
-      width: 100%;
-      height: 1px;
-      background: #c4c4c4;
-      position: absolute;
-      bottom: 0;
-      left: 0;
-    }
-  `}
 `;
