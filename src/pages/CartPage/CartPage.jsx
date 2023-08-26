@@ -29,6 +29,7 @@ export default function CartPage() {
   const setOpenModal = useSetRecoilState(openModalSelector);
   const setCloseModal = useSetRecoilState(closeModalSelector);
   const cartItemIdToDelete = useRecoilValue(cartItemToDeleteAtom);
+  const [isAmountChanged, setIsAmountChanged] = useState(false);
 
   const handleDeleteClick = () => {
     setCloseModal();
@@ -64,6 +65,8 @@ export default function CartPage() {
     getCartList();
   }, []);
 
+  const [checkList, setCheckList] = useState([]);
+
   return (
     <>
       <Header isLogin={isLogin} isSeller={isSeller} />
@@ -72,11 +75,20 @@ export default function CartPage() {
           <div css={contentDivStyles}>
             <h2 css={h2Styles}>장바구니</h2>
 
-            <ProductTable items={items} />
+            <ProductTable
+              items={items}
+              checkList={checkList}
+              setCheckList={setCheckList}
+              isAmountChanged={isAmountChanged}
+              setIsAmountChanged={setIsAmountChanged}
+            />
 
             {items.length !== 0 ? (
               <>
-                <OrderTotalBox />
+                <OrderTotalBox
+                  checkList={checkList}
+                  isAmountChanged={isAmountChanged}
+                />
                 <div css={buttonWrapDivStyles}>
                   <Button size="lg">주문하기</Button>
                 </div>

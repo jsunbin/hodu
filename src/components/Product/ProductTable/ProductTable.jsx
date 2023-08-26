@@ -8,14 +8,24 @@ export default function ProductTable({
   page = 'cart',
   isCheckBox = true,
   items,
+  checkList,
+  setCheckList,
+  isAmountChanged,
+  setIsAmountChanged,
 }) {
-  const [checkList, setCheckList] = useState([]);
+  // const [checkList, setCheckList] = useState([]);
 
-  console.log(items);
+  console.log('장바구니 리스트: ', items);
+  console.log('체크리스트: ', checkList);
 
   useEffect(() => {
     setCheckList(
-      items.map(item => ({ id: item.product_id, isChecked: false })),
+      items.map(item => ({
+        id: item.product_id,
+        isChecked: false,
+        price: 0 * item.quantity,
+        deliveryFee: 0,
+      })),
     );
   }, []);
 
@@ -32,6 +42,8 @@ export default function ProductTable({
           items={items}
           checkList={checkList}
           setCheckList={setCheckList}
+          isAmountChanged={isAmountChanged}
+          setIsAmountChanged={setIsAmountChanged}
         />
       ) : (
         <tbody>

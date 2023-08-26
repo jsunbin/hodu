@@ -1,11 +1,38 @@
 /** @jsxImportSource @emotion/react */
-import React from 'react';
+import React, { useState } from 'react';
 import { css } from '@emotion/react';
 import Price from '../../components/Price/Price';
 import minusIcon from '../../assets/images/icon-minus-2.svg';
 import plusIcon from '../../assets/images/icon-plus-2.svg';
+import { useRecoilState } from 'recoil';
+import { CartItemAtom } from '../../recoil/CartItemAtom';
+import { useEffect } from 'react';
 
-export default function OrderTotalBox() {
+export default function OrderTotalBox({ checkList, isAmountChanged }) {
+  const [totalProductPrice, setTotalProductPrice] = useState(0);
+  const [totalShippingFee, setTotalShippingFee] = useState(0);
+  const [totalPrice, setTotalPrice] = useState(0);
+
+  console.log('total: ', checkList);
+
+  useEffect(() => {
+    console.log(checkList);
+    setTotalProductPrice(
+      checkList
+        .filter(item => item.isChecked)
+        .reduce((total, item) => total + item.price, 0),
+    );
+    setTotalShippingFee(
+      checkList
+        .filter(item => item.isChecked)
+        .reduce((total, item) => total + item.deliveryFee, 0),
+    );
+  }, [isAmountChanged, checkList]);
+
+  useEffect(() => {
+    setTotalPrice(totalProductPrice + totalShippingFee);
+  }, [totalProductPrice, totalShippingFee]);
+
   return (
     <div css={orderTotalBoxWrapDivStyles}>
       <div
@@ -20,7 +47,7 @@ export default function OrderTotalBox() {
         ]}
       >
         <h4>총 상품금액</h4>
-        <Price size="md">46,500</Price>
+        <Price size="md">{totalProductPrice}</Price>
       </div>
 
       <div
@@ -40,13 +67,13 @@ export default function OrderTotalBox() {
 
       <div css={itemStyles}>
         <h4>배송비</h4>
-        <Price size="md">0</Price>
+        <Price size="md">{totalShippingFee}</Price>
       </div>
 
       <div css={itemStyles}>
         <h4>결제 예정 금액</h4>
         <Price size="lg" color="#EB5757">
-          46,500
+          {totalPrice}
         </Price>
       </div>
     </div>

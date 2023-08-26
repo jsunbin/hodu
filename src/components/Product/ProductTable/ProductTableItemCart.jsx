@@ -19,6 +19,8 @@ export default function ProductTableItemCart({
   item,
   checkList,
   setCheckList,
+  isAmountChanged,
+  setIsAmountChanged,
 }) {
   const accessToken = useRecoilValue(TokenAtom);
   const isAllCheckedR = useRecoilValue(AllCheckedAtom);
@@ -29,7 +31,7 @@ export default function ProductTableItemCart({
   const [amount, setAmount] = useRecoilState(AmountAtom);
 
   const [isDifferent, setIsDifferent] = useState(false);
-  const [isChanged, setIsChanged] = useState(false);
+  // const [isAmountChanged, setIsAmountChanged] = useState(false);
 
   const setOpenModal = useSetRecoilState(openModalSelector);
   const setCartItemToDelete = useSetRecoilState(cartItemToDeleteAtom);
@@ -78,7 +80,7 @@ export default function ProductTableItemCart({
         amount,
       );
 
-      setIsChanged(false);
+      setIsAmountChanged(false);
 
       // 주문수정 후, 1.5초 뒤에 NoButtomModal 닫기
       setIsNoButtonModalVisible(true);
@@ -111,6 +113,23 @@ export default function ProductTableItemCart({
   useEffect(() => {
     getProductsDetails();
   }, []);
+
+  useEffect(() => {
+    console.log('checked됨');
+    // setCheckList(updatedCheckList);
+
+    setCheckList(prevList =>
+      prevList.map(v =>
+        v.id === item.product_id
+          ? {
+              ...v,
+              price: productTotalPrice(),
+              deliveryFee: product.shipping_fee,
+            }
+          : v,
+      ),
+    );
+  }, [isChecked]);
 
   return (
     !isLoading && (
@@ -184,7 +203,7 @@ export default function ProductTableItemCart({
                 min={item.quantity}
                 max={product.stock}
                 setIsDifferent={setIsDifferent}
-                setIsChanged={setIsChanged}
+                setIsAmountChanged={setIsAmountChanged}
                 setAmountG={setAmountG}
               />
               {isDifferent && (
@@ -204,7 +223,7 @@ export default function ProductTableItemCart({
                   </strong>
                 </>
               )}
-              {isChanged && (
+              {isAmountChanged && (
                 <button
                   type="button"
                   onClick={handleOrderChangeClick}
