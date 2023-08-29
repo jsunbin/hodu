@@ -1,33 +1,31 @@
 /** @jsxImportSource @emotion/react */
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { css } from '@emotion/react';
 import Price from '../../components/Price/Price';
 import minusIcon from '../../assets/images/icon-minus-2.svg';
 import plusIcon from '../../assets/images/icon-plus-2.svg';
-import { useRecoilState } from 'recoil';
-import { CartItemAtom } from '../../recoil/CartItemAtom';
-import { useEffect } from 'react';
+import { useRecoilValue } from 'recoil';
+import { CheckedItemAtom } from '../../recoil/CheckedItemAtom';
 
-export default function OrderTotalBox({ checkList, isAmountChanged }) {
+export default function OrderTotalBox() {
+  const checkedItem = useRecoilValue(CheckedItemAtom);
   const [totalProductPrice, setTotalProductPrice] = useState(0);
   const [totalShippingFee, setTotalShippingFee] = useState(0);
   const [totalPrice, setTotalPrice] = useState(0);
 
-  console.log('total: ', checkList);
-
   useEffect(() => {
-    console.log(checkList);
+    console.log('아이템 상태:', checkedItem);
     setTotalProductPrice(
-      checkList
+      checkedItem
         .filter(item => item.isChecked)
         .reduce((total, item) => total + item.price, 0),
     );
     setTotalShippingFee(
-      checkList
+      checkedItem
         .filter(item => item.isChecked)
-        .reduce((total, item) => total + item.deliveryFee, 0),
+        .reduce((total, item) => total + item.shippingFee, 0),
     );
-  }, [isAmountChanged, checkList]);
+  }, [checkedItem]);
 
   useEffect(() => {
     setTotalPrice(totalProductPrice + totalShippingFee);

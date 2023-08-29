@@ -1,39 +1,40 @@
 /** @jsxImportSource @emotion/react */
-import React, { useState, useEffect } from 'react';
-import { useSetRecoilState } from 'recoil';
-import { AllCheckedAtom } from '../../../recoil/AllCheckedAtom';
+import React, { useEffect, useState } from 'react';
 import { css } from '@emotion/react';
+import { useRecoilState } from 'recoil';
+import { AllCheckedAtom } from '../../../recoil/AllCheckedAtom';
+import { CheckedItemAtom } from '../../../recoil/CheckedItemAtom';
 
 export default function ProductTableTitle({
   page = 'cart',
   isCheckBox = true,
-  checkList,
-  setCheckList,
 }) {
-  const [isChecked, setIsChecked] = useState(false);
-  const setIsAllCheckedR = useSetRecoilState(AllCheckedAtom);
+  const [isAllCheckedLocal, setIsAllCheckedLocal] = useState(false);
+  const [isAllChecked, setIsAllChecked] = useRecoilState(AllCheckedAtom);
+  const [checkedItem, setCheckedItem] = useRecoilState(CheckedItemAtom);
 
   const handleCheckBoxClick = event => {
     event.preventDefault();
-    setIsChecked(!isChecked);
-    setIsAllCheckedR(!isChecked);
 
-    const updatedCheckList = checkList.map(item => ({
+    const updatedCheckList = checkedItem.map(item => ({
       ...item,
-      isChecked: !isChecked,
+      isChecked: !isAllChecked,
     }));
 
-    setCheckList(updatedCheckList);
+    setCheckedItem(updatedCheckList);
+
+    setIsAllChecked(!isAllChecked);
+    setIsAllCheckedLocal(!isAllChecked);
   };
 
   useEffect(() => {
-    if (checkList.length !== 0) {
-      const isAllChecked = checkList.every(item => item.isChecked);
-      setIsChecked(isAllChecked);
+    if (checkedItem.every(v => v.isChecked) && checkedItem[0]?.price) {
+      setIsAllChecked(true);
+      setIsAllCheckedLocal(true);
     } else {
-      setIsChecked(false);
+      setIsAllCheckedLocal(false);
     }
-  }, [checkList]);
+  }, [checkedItem]);
 
   const tabTitleList = {
     cart: {
@@ -54,7 +55,7 @@ export default function ProductTableTitle({
               title="모든 상품을 결제상품으로 설정"
               type="checkbox"
               className="a11y-hidden"
-              checked={isChecked}
+              checked={isAllChecked}
               readOnly
             />
             <div css={allOrderSelectStyles} onClick={handleCheckBoxClick}>
@@ -72,7 +73,9 @@ export default function ProductTableTitle({
                   stroke="#21BF48"
                   strokeWidth="2"
                 />
-                {isChecked && <circle cx="10" cy="10" r="6" fill="#21BF48" />}
+                {isAllCheckedLocal && (
+                  <circle cx="10" cy="10" r="6" fill="#21BF48" />
+                )}
               </svg>
             </div>
           </label>

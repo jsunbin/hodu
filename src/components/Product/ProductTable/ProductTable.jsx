@@ -1,50 +1,19 @@
 /** @jsxImportSource @emotion/react */
-import React, { useState, useEffect } from 'react';
+import React from 'react';
 import { css } from '@emotion/react';
 import ProductTableTitle from './ProductTableTitle';
-import ProductTableTbody from './ProductTableTbody';
+import ProductTbody from './ProductTbody';
+import { useRecoilValue } from 'recoil';
+import { CartItemAtom } from '../../../recoil/CartItemAtom';
 
-export default function ProductTable({
-  page = 'cart',
-  isCheckBox = true,
-  items,
-  checkList,
-  setCheckList,
-  isAmountChanged,
-  setIsAmountChanged,
-}) {
-  // const [checkList, setCheckList] = useState([]);
-
-  console.log('장바구니 리스트: ', items);
-  console.log('체크리스트: ', checkList);
-
-  useEffect(() => {
-    setCheckList(
-      items.map(item => ({
-        id: item.product_id,
-        isChecked: false,
-        price: 0 * item.quantity,
-        deliveryFee: 0,
-      })),
-    );
-  }, []);
+export default function ProductTable({ page = 'cart', isCheckBox = true }) {
+  const items = useRecoilValue(CartItemAtom);
 
   return (
     <table css={tableStyles({ page })} className={`${page}-table`}>
-      <ProductTableTitle
-        page={page}
-        isCheckBox={isCheckBox}
-        checkList={checkList}
-        setCheckList={setCheckList}
-      />
+      <ProductTableTitle page={page} isCheckBox={isCheckBox} />
       {items.length !== 0 ? (
-        <ProductTableTbody
-          items={items}
-          checkList={checkList}
-          setCheckList={setCheckList}
-          isAmountChanged={isAmountChanged}
-          setIsAmountChanged={setIsAmountChanged}
-        />
+        <ProductTbody page={page} />
       ) : (
         <tbody>
           <tr>
@@ -64,6 +33,13 @@ export default function ProductTable({
     </table>
   );
 }
+
+const tableStyles = props => css`
+  width: 1280px;
+  text-align: center;
+  border-collapse: separate;
+  border-spacing: ${props.page === 'cart' ? '0 35px' : '0 16px'};
+`;
 
 const noItemDivStyles = css`
   width: 100%;
@@ -89,11 +65,4 @@ const noItemSpanStyles = css`
   font-weight: 400;
   line-height: normal;
   margin-top: 16px;
-`;
-
-const tableStyles = props => css`
-  width: 1280px;
-  text-align: center;
-  border-collapse: separate;
-  border-spacing: ${props.page === 'cart' ? '0 35px' : '0 16px'};
 `;

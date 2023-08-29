@@ -1,79 +1,67 @@
 /** @jsxImportSource @emotion/react */
-import React, { useState, useEffect } from 'react';
-import { useRecoilState, useRecoilValue, useSetRecoilState } from 'recoil';
-import { TokenAtom } from '../../../recoil/TokenAtom';
-import { AmountAtom } from '../../../recoil/AmountAtom';
-import { AllCheckedAtom } from '../../../recoil/AllCheckedAtom';
-import { openModalSelector } from '../../../recoil/ModalAtom';
-import { cartItemToDeleteAtom } from '../../../recoil/CartItemToDeleteAtom';
-import { productsDetailAPI } from '../../../api/productsAPI';
+import React, { useEffect, useState } from 'react';
 import { css } from '@emotion/react';
 import Amount from '../../common/Amount/Amount';
 import Button from '../../Button/Button';
+import { productsDetailAPI } from '../../../api/productsAPI';
 import DeliveryMethod from '../../DeliveryMethod/DeliveryMethod';
-import { Link } from 'react-router-dom';
+import { useRecoilState, useRecoilValue, useSetRecoilState } from 'recoil';
+import { openModalSelector } from '../../../recoil/ModalAtom';
+import { cartItemIdToDeleteAtom } from '../../../recoil/CartItemIdToDeleteAtom';
 import { amountCartAPI } from '../../../api/cartAPI';
+import { TokenAtom } from '../../../recoil/TokenAtom';
 import NoButtonModal from '../../Modal/NoButtonMoal/NoButtonModal';
+import { CheckedItemAtom } from '../../../recoil/CheckedItemAtom';
+import { AllCheckedAtom } from '../../../recoil/AllCheckedAtom';
 
-export default function ProductTableItemCart({
-  item,
-  checkList,
-  setCheckList,
-  isAmountChanged,
-  setIsAmountChanged,
-}) {
-  const accessToken = useRecoilValue(TokenAtom);
-  const isAllCheckedR = useRecoilValue(AllCheckedAtom);
-  const [product, setProduct] = useState([]);
-  const [isChecked, setIsChecked] = useState(!isAllCheckedR);
+export default function ProductTableItemCart({ item }) {
+  const [details, setDetails] = useState([]);
+  const [amount, setAmount] = useState(1);
+  const [isAmountChanged, setIsAmountChanged] = useState(false);
+  const [isNoButtonModalVisible, setIsNoButtonModalVisible] = useState(false);
+  const [isChecked, setIsChecked] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
-  const [loadingError, setLoadingError] = useState(null);
-  const [amount, setAmount] = useRecoilState(AmountAtom);
-
-  const [isDifferent, setIsDifferent] = useState(false);
-  // const [isAmountChanged, setIsAmountChanged] = useState(false);
-
+  const accessToken = useRecoilValue(TokenAtom);
+  const [isAllChecked, setIsAllChecked] = useRecoilState(AllCheckedAtom);
+  const [checkedItem, setCheckedItem] = useRecoilState(CheckedItemAtom);
+  const setCartItemIdToDelete = useSetRecoilState(cartItemIdToDeleteAtom);
   const setOpenModal = useSetRecoilState(openModalSelector);
-  const setCartItemToDelete = useSetRecoilState(cartItemToDeleteAtom);
-
-  const [amountG, setAmountG] = useState(0);
 
   const productTotalPrice = () => {
-    const { price } = product;
+    const { price } = details;
 
-    return price * amountG;
+    return parseInt(price * amount);
   };
 
-  // 장바구니 삭제 클릭
-  const handleDeleteClick = (event, cartItemId) => {
+  const handleCheckBoxClick = event => {
     event.preventDefault();
-    setOpenModal();
-    setCartItemToDelete(cartItemId);
-  };
 
-  useEffect(() => {
-    setIsChecked(isAllCheckedR);
-  }, [isAllCheckedR]);
-
-  // 상품 체크박스 클릭 했을 때
-  const handleCheckBoxClick = (event, productId) => {
-    event.preventDefault();
+    if (isChecked) {
+      setIsAllChecked(isChecked);
+    }
 
     setIsChecked(!isChecked);
-
-    setCheckList(prevList =>
-      prevList.map(item =>
-        item.id === productId ? { ...item, isChecked: !item.isChecked } : item,
-      ),
-    );
   };
-
-  const [isNoButtonModalVisible, setIsNoButtonModalVisible] = useState(false);
 
   // 주문수정 클릭 했을 때
   const handleOrderChangeClick = async () => {
+    const itemInfo = {
+      productId: item.product_id,
+      cartItemId: item.cart_item_id,
+      price: productTotalPrice(),
+      shippingFee: details.shipping_fee === 0 ? 0 : 2500,
+      isChecked: isChecked,
+    };
+
+    setCheckedItem(prev => {
+      const updatedItems = prev.filter(
+        existingItem => existingItem.productId !== itemInfo.productId,
+      );
+      return [...updatedItems, itemInfo];
+    });
+
     try {
-      const data = await amountCartAPI(
+      await amountCartAPI(
         accessToken,
         item.cart_item_id,
         item.product_id,
@@ -92,18 +80,30 @@ export default function ProductTableItemCart({
     }
   };
 
+  // 상품 삭제
+  const handleDeleteClick = event => {
+    event.preventDefault();
+
+    const cartItemId = item.cart_item_id;
+
+    setCartItemIdToDelete(cartItemId);
+    setOpenModal();
+
+    // setCheckedItem(prev => [
+    //   ...prev.filter(v => v.cartItemId !== item.cart_item_id),
+    // ]);
+  };
+
   // 상품 상세 정보
   const getProductsDetails = async () => {
     try {
       setIsLoading(true);
-      setLoadingError(null);
+      const response = await productsDetailAPI(item.product_id);
+      const { data } = response;
 
-      const data = await productsDetailAPI(item.product_id);
-
-      setProduct(data.data);
-      setAmount(item.quantity);
+      setDetails(data);
+      console.log(data);
     } catch (error) {
-      setLoadingError(error);
       console.error(error);
     } finally {
       setIsLoading(false);
@@ -112,45 +112,45 @@ export default function ProductTableItemCart({
 
   useEffect(() => {
     getProductsDetails();
+    setAmount(item.quantity);
   }, []);
 
+  // 장바구니 상황 정보 업데이트
   useEffect(() => {
-    console.log('checked됨');
-    // setCheckList(updatedCheckList);
+    const itemInfo = {
+      productId: item.product_id,
+      cartItemId: item.cart_item_id,
+      price: item.quantity * details.price,
+      shippingFee: details.shipping_fee === 0 ? 0 : 2500,
+      isChecked: isChecked,
+    };
 
-    setCheckList(prevList =>
-      prevList.map(v =>
-        v.id === item.product_id
-          ? {
-              ...v,
-              price: productTotalPrice(),
-              deliveryFee: product.shipping_fee,
-            }
-          : v,
-      ),
-    );
+    setCheckedItem(prev => {
+      const updatedItems = prev.filter(
+        existingItem => existingItem.productId !== itemInfo.productId,
+      );
+      return [...updatedItems, itemInfo];
+    });
   }, [isChecked]);
+
+  // 전체 선택: isAllChecked
+  useEffect(() => {
+    setIsChecked(isAllChecked);
+  }, [isAllChecked]);
 
   return (
     !isLoading && (
-      <article
-        css={productItemArticleStyles}
-        data-id={item.product_id}
-        data-cart-item-id={item.product_item_id}
-      >
+      <article css={productItemArticleStyles}>
         <div css={css({ margin: '0 30px' })}>
           <label>
             <input
-              title="상품을 결제상품으로 설정"
+              title={`${details.product_name}을 결제상품으로 설정`}
               type="checkbox"
               className="a11y-hidden"
               checked={isChecked}
               readOnly
             />
-            <div
-              css={allOrderSelectStyles}
-              onClick={event => handleCheckBoxClick(event, item.product_id)}
-            >
+            <button css={allOrderSelectStyles} onClick={handleCheckBoxClick}>
               <svg
                 xmlns="http://www.w3.org/2000/svg"
                 width="20"
@@ -167,69 +167,52 @@ export default function ProductTableItemCart({
                 />
                 {isChecked && <circle cx="10" cy="10" r="6" fill="#21BF48" />}
               </svg>
-            </div>
+            </button>
           </label>
         </div>
 
         <div css={productInfoDivStyles}>
-          <Link to={`/product/${item.product_id}`}>
-            <img src={product.image} alt={product.product_name} />
-          </Link>
+          <a href={`/product/${item.product_id}`}>
+            <img src={details.image} alt={details.product_name} />
+          </a>
           <div css={productBasicInfoDivStyles}>
-            <span className="product-seller">{product.store_name}</span>
-            <Link to={`/product/${item.product_id}`}>
-              <strong className="product-name">{product.product_name}</strong>
-            </Link>
+            <span className="product-seller">{details.store_name}</span>
+            <a href={`/product/${item.product_id}`}>
+              <strong className="product-name">{details.product_name}</strong>
+            </a>
             <span className="product-unit-price">
-              {parseInt(product.price).toLocaleString()}원
+              {parseInt(details.price).toLocaleString()}원
             </span>
             {/* <span css={deliveryOptionsSpanStyles}>택배배송 / 무료배송</span> */}
             <DeliveryMethod
               styles={deliveryOptionsSpanStyles}
-              shippingMethod={product.shipping_method}
-              shippingFee={product.shipping_fee}
+              shippingMethod={details.shipping_method}
+              shippingFee={details.shipping_fee}
             />
           </div>
         </div>
 
         <div css={css({ margin: '0 48px', position: 'relative' })}>
-          {product.stock === 0 ? (
-            <Button size="md" width="150px" disabled>
+          {details.stock === 0 ? (
+            <Button size="md" width="150px">
               품절
             </Button>
           ) : (
             <>
               <Amount
-                min={item.quantity}
-                max={product.stock}
-                setIsDifferent={setIsDifferent}
+                amount={amount}
+                setAmount={setAmount}
+                max={details.stock}
                 setIsAmountChanged={setIsAmountChanged}
-                setAmountG={setAmountG}
               />
-              {isDifferent && (
-                <>
-                  <strong
-                    css={css`
-                      position: absolute;
-                      display: block;
-                      color: #eb5757;
-                      font-size: 11px;
-                      font-weight: bold;
-                      bottom: -1.5rem;
-                      left: 0;
-                    `}
-                  >
-                    최대 주문 가능 수량은 {product.stock}개 입니다.
-                  </strong>
-                </>
-              )}
+
               {isAmountChanged && (
                 <button
                   type="button"
                   onClick={handleOrderChangeClick}
                   css={css`
                     position: absolute;
-                    bottom: ${isDifferent ? '-4rem' : '-3.5em'};
+                    bottom: -3.5em;
                     left: 50%;
                     transform: translateX(-50%);
                     display: block;
@@ -264,10 +247,7 @@ export default function ProductTableItemCart({
         </div>
 
         <div css={itemDeleteStyles}>
-          <button
-            type="button"
-            onClick={event => handleDeleteClick(event, item.cart_item_id)}
-          >
+          <button type="button" onClick={handleDeleteClick}>
             <svg
               width="22"
               height="22"
@@ -306,6 +286,7 @@ const productItemArticleStyles = css({
 
 const allOrderSelectStyles = css({
   cursor: 'pointer',
+  background: 'transparent',
   svg: {
     verticalAlign: 'middle',
   },
