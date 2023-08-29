@@ -20,6 +20,7 @@ import Button from '../../components/Button/Button';
 import TabMenu from '../../components/TabMenu/TabMenu';
 import Modal from '../../components/Modal/Modal';
 import ConfirmModal from '../../components/Modal/ConfirmModal/ConfirmModal';
+import DeliveryMethod from '../../components/DeliveryMethod/DeliveryMethod';
 
 export default function ProductDetailsPage() {
   const navigate = useNavigate();
@@ -141,9 +142,11 @@ export default function ProductDetailsPage() {
                 <Price size="lg">{item.price}</Price>
               </div>
 
-              <span css={deliveryOptionsSpanStyles}>
-                {deliveryMethod} / {deliveryFee}
-              </span>
+              <DeliveryMethod
+                styles={deliveryOptionsSpanStyles}
+                shippingMethod={item.shipping_method}
+                shippingFee={item.shipping_fee}
+              />
 
               {item.stock === 0 ? (
                 <Button disabled width="630px">
