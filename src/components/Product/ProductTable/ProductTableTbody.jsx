@@ -9,6 +9,8 @@ export default function ProductTableTbody({
   items,
   checkList,
   setCheckList,
+  isAmountChanged,
+  setIsAmountChanged,
 }) {
   return page === 'cart' ? (
     <tbody css={tbodyStyles({ page })}>
@@ -19,6 +21,8 @@ export default function ProductTableTbody({
               item={item}
               checkList={checkList}
               setCheckList={setCheckList}
+              isAmountChanged={isAmountChanged}
+              setIsAmountChanged={setIsAmountChanged}
             />
           </td>
         </tr>
