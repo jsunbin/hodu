@@ -1,76 +1,95 @@
 /** @jsxImportSource @emotion/react */
 import React, { useEffect, useState } from 'react';
 import { css } from '@emotion/react';
-import { useRecoilState } from 'recoil';
+import { useSetRecoilState } from 'recoil';
 import { AmountAtom } from '../../../recoil/AmountAtom';
 
-export default function Amount({ max }) {
-  // const [amount, setAmount] = useState(1);
+export default function Amount({
+  amount,
+  setAmount,
+  max,
+  setIsAmountChanged = () => {},
+}) {
+  // const [amount, setAmount] = useState(min);
   const [isDisabledMinus, setIsDisabeldMinus] = useState(true);
   const [isDisabledPlus, setIsDisabeldPlus] = useState(false);
-  const [amount, setAmount] = useRecoilState(AmountAtom);
+  const setGlobalAmount = useSetRecoilState(AmountAtom);
 
   const minusClickHandler = () => {
     setAmount(prev => prev - 1);
+    setIsAmountChanged(true);
   };
 
   const plusClickHandelr = () => {
     setAmount(prev => prev + 1);
+    setIsAmountChanged(true);
+  };
+
+  const changeAmount = () => {
+    if (amount <= 1) {
+      setIsDisabeldMinus(true);
+      setIsDisabeldPlus(false);
+    } else if (amount < max) {
+      setIsDisabeldMinus(false);
+      setIsDisabeldPlus(false);
+    } else if (amount >= max) {
+      setIsDisabeldMinus(false);
+      setIsDisabeldPlus(true);
+    }
   };
 
   useEffect(() => {
-    console.log(amount);
-    if (amount === 1) {
-      setIsDisabeldMinus(true);
-      setIsDisabeldPlus(false);
-    } else if (amount >= max) {
-      setIsDisabeldPlus(true);
-      setIsDisabeldMinus(false);
-    } else if (amount > 1) {
-      setIsDisabeldMinus(false);
-    }
+    changeAmount();
+    setGlobalAmount(amount);
   }, [amount]);
 
   return (
     <div css={amountDivStyles}>
-      <button
-        css={minusButtonStlyes}
-        type="button"
-        className="btn-minus"
-        onClick={minusClickHandler}
-        disabled={isDisabledMinus}
-      >
-        <span className="a11y-hidden">수량 빼기</span>
-        <svg
-          width="20"
-          height="20"
-          viewBox="0 0 20 20"
-          fill="none"
-          xmlns="http://www.w3.org/2000/svg"
-        >
-          <path d="M0 10H20" stroke="#C4C4C4" strokeWidth="2" />
-        </svg>
-      </button>
-      <strong css={strongStyles}>{amount}</strong>
-      <button
-        css={plusButtonStlyes}
-        type="button"
-        className="btn-plus"
-        onClick={plusClickHandelr}
-        disabled={isDisabledPlus}
-      >
-        <span className="a11y-hidden">수량 추가</span>
-        <svg
-          width="20"
-          height="20"
-          viewBox="0 0 20 20"
-          fill="none"
-          xmlns="http://www.w3.org/2000/svg"
-        >
-          <path d="M0 9.5H20" stroke="#C4C4C4" strokeWidth="2" />
-          <path d="M10 20L10 0" stroke="#C4C4C4" strokeWidth="2" />
-        </svg>
-      </button>
+      {max === 1 ? (
+        <strong>마지막 1개!</strong>
+      ) : (
+        <>
+          {' '}
+          <button
+            css={minusButtonStlyes}
+            type="button"
+            className="btn-minus"
+            onClick={minusClickHandler}
+            disabled={isDisabledMinus}
+          >
+            <span className="a11y-hidden">수량 빼기</span>
+            <svg
+              width="20"
+              height="20"
+              viewBox="0 0 20 20"
+              fill="none"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <path d="M0 10H20" stroke="#C4C4C4" strokeWidth="2" />
+            </svg>
+          </button>
+          <strong css={strongStyles}>{amount}</strong>
+          <button
+            css={plusButtonStlyes}
+            type="button"
+            className="btn-plus"
+            onClick={plusClickHandelr}
+            disabled={isDisabledPlus}
+          >
+            <span className="a11y-hidden">수량 추가</span>
+            <svg
+              width="20"
+              height="20"
+              viewBox="0 0 20 20"
+              fill="none"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <path d="M0 9.5H20" stroke="#C4C4C4" strokeWidth="2" />
+              <path d="M10 20L10 0" stroke="#C4C4C4" strokeWidth="2" />
+            </svg>
+          </button>
+        </>
+      )}
     </div>
   );
 }

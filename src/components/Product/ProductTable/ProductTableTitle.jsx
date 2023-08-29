@@ -1,17 +1,40 @@
 /** @jsxImportSource @emotion/react */
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { css } from '@emotion/react';
+import { useRecoilState } from 'recoil';
+import { AllCheckedAtom } from '../../../recoil/AllCheckedAtom';
+import { CheckedItemAtom } from '../../../recoil/CheckedItemAtom';
 
 export default function ProductTableTitle({
   page = 'cart',
   isCheckBox = true,
 }) {
-  const [isChecked, setIsChecked] = useState(false);
+  const [isAllCheckedLocal, setIsAllCheckedLocal] = useState(false);
+  const [isAllChecked, setIsAllChecked] = useRecoilState(AllCheckedAtom);
+  const [checkedItem, setCheckedItem] = useRecoilState(CheckedItemAtom);
 
   const handleCheckBoxClick = event => {
     event.preventDefault();
-    setIsChecked(!isChecked);
+
+    const updatedCheckList = checkedItem.map(item => ({
+      ...item,
+      isChecked: !isAllChecked,
+    }));
+
+    setCheckedItem(updatedCheckList);
+
+    setIsAllChecked(!isAllChecked);
+    setIsAllCheckedLocal(!isAllChecked);
   };
+
+  useEffect(() => {
+    if (checkedItem.every(v => v.isChecked) && checkedItem[0]?.price) {
+      setIsAllChecked(true);
+      setIsAllCheckedLocal(true);
+    } else {
+      setIsAllCheckedLocal(false);
+    }
+  }, [checkedItem]);
 
   const tabTitleList = {
     cart: {
@@ -32,7 +55,7 @@ export default function ProductTableTitle({
               title="모든 상품을 결제상품으로 설정"
               type="checkbox"
               className="a11y-hidden"
-              checked={isChecked}
+              checked={isAllChecked}
               readOnly
             />
             <div css={allOrderSelectStyles} onClick={handleCheckBoxClick}>
@@ -50,7 +73,9 @@ export default function ProductTableTitle({
                   stroke="#21BF48"
                   strokeWidth="2"
                 />
-                {isChecked && <circle cx="10" cy="10" r="6" fill="#21BF48" />}
+                {isAllCheckedLocal && (
+                  <circle cx="10" cy="10" r="6" fill="#21BF48" />
+                )}
               </svg>
             </div>
           </label>
