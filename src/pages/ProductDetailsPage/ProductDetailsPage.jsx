@@ -7,7 +7,6 @@ import { productsDetailAPI } from '../../api/productsAPI';
 import { addCartAPI, cartListAPI } from '../../api/cartAPI';
 import { isUserSeller } from '../../recoil/LoginAtom';
 import { isLoginSelector, TokenAtom } from '../../recoil/TokenAtom';
-import { AmountAtom } from '../../recoil/AmountAtom';
 import {
   closeModalSelector,
   modalStateAtom,
@@ -27,17 +26,16 @@ export default function ProductDetailsPage() {
   const accessToken = useRecoilValue(TokenAtom);
   const isLogin = useRecoilValue(isLoginSelector);
   const isSeller = useRecoilValue(isUserSeller);
-  const amount = useRecoilValue(AmountAtom);
   const modalState = useRecoilValue(modalStateAtom);
   const setOpenModal = useSetRecoilState(openModalSelector);
   const setCloseModal = useSetRecoilState(closeModalSelector);
   const [item, setItem] = useState([]);
   const [price, setPrice] = useState('0');
+  const [amount, setAmount] = useState(1);
   const [deliveryMethod, setDeliveryMethod] = useState('택배배송');
   const [deliveryFee, setDeliveryFee] = useState('무료배송');
   const [isItemInCart, setIsItemInCart] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
-  const [loadingError, setLoadingError] = useState(null);
   const productId = window.location.pathname.replace('/product/', '');
 
   const handleCartClick = async () => {
@@ -68,7 +66,6 @@ export default function ProductDetailsPage() {
   const getProductsDetails = async productId => {
     try {
       setIsLoading(true);
-      setLoadingError(null);
 
       const data = await productsDetailAPI(productId);
 
@@ -76,7 +73,6 @@ export default function ProductDetailsPage() {
 
       console.log('상세: ', data);
     } catch (error) {
-      setLoadingError(error);
       console.error(error);
     } finally {
       setIsLoading(false);
@@ -99,7 +95,6 @@ export default function ProductDetailsPage() {
   const addItemToCart = async () => {
     try {
       setIsLoading(true);
-      setLoadingError(null);
 
       const data = await addCartAPI({
         accessToken,
@@ -156,7 +151,11 @@ export default function ProductDetailsPage() {
                 </Button>
               ) : (
                 <>
-                  <Amount max={item.stock} />
+                  <Amount
+                    amount={amount}
+                    setAmount={setAmount}
+                    max={item.stock}
+                  />
                   <div css={productTotalStyles}>
                     <span className="title">총 상품 금액</span>
                     <div css={orderDetailsStyles}>
