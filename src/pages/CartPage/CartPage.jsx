@@ -11,11 +11,7 @@ import { isLoginSelector, TokenAtom } from '../../recoil/TokenAtom';
 import { isUserSeller } from '../../recoil/LoginAtom';
 import { cartListAPI, deleteCartItemAPI } from '../../api/cartAPI';
 import { CartItemAtom } from '../../recoil/CartItemAtom';
-import {
-  closeModalSelector,
-  modalStateAtom,
-  openModalSelector,
-} from '../../recoil/ModalAtom';
+import { closeModalSelector, modalStateAtom } from '../../recoil/ModalAtom';
 import Modal from '../../components/Modal/Modal';
 import { cartItemIdToDeleteAtom } from '../../recoil/CartItemIdToDeleteAtom';
 import { CheckedItemAtom } from '../../recoil/CheckedItemAtom';
@@ -26,7 +22,6 @@ export default function CartPage() {
   const isSeller = useRecoilValue(isUserSeller);
   const cartItemIdToDelete = useRecoilValue(cartItemIdToDeleteAtom);
   const modalState = useRecoilValue(modalStateAtom);
-  const setOpenModal = useSetRecoilState(openModalSelector);
   const setCloseModal = useSetRecoilState(closeModalSelector);
   const [checkedItem, setCheckedItem] = useRecoilState(CheckedItemAtom);
 
@@ -75,11 +70,17 @@ export default function CartPage() {
         <main>
           <div css={contentDivStyles}>
             <h2 css={h2Styles}>장바구니</h2>
-            <ProductTable items={items} />
-            <OrderTotalBox />
-            <div css={buttonWrapDivStyles}>
-              <Button size="lg">주문하기</Button>
-            </div>
+            <ProductTable />
+            {items.length !== 0 ? (
+              <>
+                <OrderTotalBox />
+                <div css={buttonWrapDivStyles}>
+                  <Button size="lg">주문하기</Button>
+                </div>
+              </>
+            ) : (
+              ''
+            )}
           </div>
           {modalState.isOpen && (
             <Modal yesOnClickEvent={handleDeleteItemClick}>
