@@ -1,7 +1,7 @@
 /** @jsxImportSource @emotion/react */
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useRecoilValue, useSetRecoilState } from 'recoil';
+import { useRecoilState, useRecoilValue, useSetRecoilState } from 'recoil';
 import { css } from '@emotion/react';
 import { productsDetailAPI } from '../../api/productsAPI';
 import { addCartAPI, cartListAPI } from '../../api/cartAPI';
@@ -21,6 +21,7 @@ import TabMenu from '../../components/TabMenu/TabMenu';
 import Modal from '../../components/Modal/Modal';
 import ConfirmModal from '../../components/Modal/ConfirmModal/ConfirmModal';
 import DeliveryMethod from '../../components/DeliveryMethod/DeliveryMethod';
+import { orderItemAtom } from '../../recoil/OrderAtom';
 
 export default function ProductDetailsPage() {
   const navigate = useNavigate();
@@ -41,6 +42,7 @@ export default function ProductDetailsPage() {
 
   const handleCartClick = async () => {
     const data = await getCartList(accessToken);
+    console.log('ss:', data);
 
     const { results } = data.data;
 
@@ -78,6 +80,22 @@ export default function ProductDetailsPage() {
     } finally {
       setIsLoading(false);
     }
+  };
+
+  // 바로구매 버튼 클릭 이벤트
+  const [orderItems, setOrderItems] = useRecoilState(orderItemAtom);
+
+  const handleOrderNowClick = () => {
+    console.log(orderItems);
+    console.log('바로구매');
+
+    setOrderItems({
+      price: price + item.shipping_fee,
+      items: [{ ...item, totalAmount: amount }],
+    });
+
+    // 이미지, 수량, 판매사, 상품이름, 총 수량,배송비, 주문금액
+    navigate('/payment');
   };
 
   // 장바구니 목록 가져오기
@@ -171,7 +189,11 @@ export default function ProductDetailsPage() {
                     </div>
                   </div>
                   <div css={btnGroupsStyles}>
-                    <Button size="md" width="416px" href={'/payment'}>
+                    <Button
+                      size="md"
+                      width="416px"
+                      onClickEvent={handleOrderNowClick}
+                    >
                       바로구매
                     </Button>
                     <Button

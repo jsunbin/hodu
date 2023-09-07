@@ -3,12 +3,8 @@ import React from 'react';
 import { css } from '@emotion/react';
 import ProductTableItemCart from '../ProductTable/ProductTableItemCart';
 import ProductTableItemPayment from '../ProductTable/ProductTableItemPayment';
-import { useRecoilValue } from 'recoil';
-import { CartItemAtom } from '../../../recoil/CartItemAtom';
 
-export default function ProductTbody({ page }) {
-  const items = useRecoilValue(CartItemAtom);
-
+export default function ProductTbody({ page, items }) {
   console.log(items);
 
   return page === 'cart' ? (
@@ -23,9 +19,11 @@ export default function ProductTbody({ page }) {
     </tbody>
   ) : (
     <tbody css={tbodyStyles({ page })}>
-      <tr css={trStyles({ page })}>
-        <ProductTableItemPayment />
-      </tr>
+      {items.map(item => (
+        <tr css={trStyles({ page })} key={item.product_id}>
+          <ProductTableItemPayment item={item} />
+        </tr>
+      ))}
     </tbody>
   );
 }
