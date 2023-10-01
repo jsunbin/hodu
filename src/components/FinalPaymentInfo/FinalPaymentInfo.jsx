@@ -4,9 +4,14 @@ import { css } from '@emotion/react';
 import CheckText from '../CheckText/CheckText';
 import Button from '../Button/Button';
 import Price from '../Price/Price';
+import { useRecoilState } from 'recoil';
+import { orderItemAtom } from '../../recoil/OrderAtom';
 
-export default function FinalPaymentInfo() {
+export default function FinalPaymentInfo({ values, onChange }) {
   const [isDisabled, setIsDisabled] = useState(true);
+  const [orderItems, setOrderItems] = useRecoilState(orderItemAtom);
+
+  console.log(orderItems);
 
   return (
     <div>
@@ -15,7 +20,7 @@ export default function FinalPaymentInfo() {
         <div css={paymentInfoDivStlyes}>
           <div css={divItemStyles}>
             <span css={spanStyles}>&#00;-&#08;상품금액</span>
-            <Price size="sm">46,500</Price>
+            <Price size="sm">{orderItems.productPrice}</Price>
           </div>
           <div css={divItemStyles}>
             <span css={spanStyles}>&#00;-&#08;할인금액</span>
@@ -23,11 +28,11 @@ export default function FinalPaymentInfo() {
           </div>
           <div css={divItemStyles}>
             <span css={spanStyles}>&#00;-&#08;배송비</span>
-            <Price size="sm">0</Price>
+            <Price size="sm">{orderItems.deliveryFee}</Price>
           </div>
           <div css={divItemStyles}>
             <span css={spanStyles}>&#00;-&#08;결제금액</span>
-            <strong>46,500원</strong>
+            <strong>{orderItems.totalPrice.toLocaleString()}원</strong>
           </div>
         </div>
 
@@ -36,7 +41,7 @@ export default function FinalPaymentInfo() {
             주문 내용을 확인하였으며, 정보 제공 등에 동의합니다.
           </CheckText>
 
-          <Button size="lg" disabled={isDisabled}>
+          <Button size="lg" disabled={isDisabled} type="submit">
             결제하기
           </Button>
         </div>

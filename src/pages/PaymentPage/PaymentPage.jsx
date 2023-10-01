@@ -1,5 +1,5 @@
 /** @jsxImportSource @emotion/react */
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { css } from '@emotion/react';
 import Header from '../../components/common/Header/Header';
 import Footer from '../../components/common/Footer/Footer';
@@ -15,6 +15,19 @@ import {
   orderItemAtom,
   sumOrderTotalPriceSelector,
 } from '../../recoil/OrderAtom';
+import { cartOrderAPI } from '../../api/orderAPI';
+
+const INITIAL_VALUES = {
+  product_id: 0,
+  quantity: 0,
+  order_kind: 'direct_order',
+  receiver: '',
+  receiver_phone_number: '',
+  address: '',
+  address_message: '',
+  payment_method: '',
+  total_price: 0,
+};
 
 export default function PaymentPage() {
   const navigate = useNavigate();
@@ -22,7 +35,31 @@ export default function PaymentPage() {
   const isLogin = useRecoilValue(isLoginSelector);
   const isSeller = useRecoilValue(isUserSeller);
   const [orderItems, setOrderItems] = useRecoilState(orderItemAtom);
+  const [values, setValues] = useState(INITIAL_VALUES);
 
+  const handleChange = (name, value) => {
+    setValues(prevValues => ({ ...prevValues, [name]: value }));
+  };
+
+  const handleSubmit = async event => {
+    console.log('결제하기');
+    event.preventDefault();
+    console.log('-> values  ', values);
+
+    try {
+      const raw = JSON.stringify(values);
+      const data = await cartOrderAPI(accessToken, raw);
+      console.log(data);
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
+  useEffect(() => {
+    handleChange('product_id', orderItems.items[0].product_id);
+    handleChange('quantity', orderItems.items[0].totalAmount);
+    handleChange('total_price', orderItems.totalPrice);
+  }, []);
   return (
     <>
       <Header isLogin={isLogin} isSeller={isSeller} />
@@ -31,15 +68,16 @@ export default function PaymentPage() {
         <div css={contentDivStyles}>
           <ProductTable page="order" />
           <div css={totalOrderPriceStyles}>
-            총 주문금액 <strong>{orderItems.price.toLocaleString()}원</strong>
+            총 주문금액
+            <strong>{orderItems.totalPrice.toLocaleString()}원</strong>
           </div>
-          <form css={formStyles}>
+          <form css={formStyles} onSubmit={handleSubmit}>
             <div css={deliveryInfoWrapDivStyles}>
-              <DeliveryInfo />
+              <DeliveryInfo values={values} onChange={handleChange} />
             </div>
             <div css={payWrapDivStyles}>
-              <PayMethod />
-              <FinalPaymentInfo />
+              <PayMethod values={values} onChange={handleChange} />
+              <FinalPaymentInfo values={values} onChange={handleChange} />
             </div>
           </form>
         </div>

@@ -90,9 +90,12 @@ export default function ProductDetailsPage() {
     console.log('바로구매');
 
     setOrderItems({
-      price: price + item.shipping_fee,
+      totalPrice: price + item.shipping_fee,
+      productPrice: price,
+      deliveryFee: item.shipping_fee,
       items: [{ ...item, totalAmount: amount }],
     });
+    console.log(orderItems);
 
     // 이미지, 수량, 판매사, 상품이름, 총 수량,배송비, 주문금액
     navigate('/payment');
@@ -132,7 +135,7 @@ export default function ProductDetailsPage() {
 
   useEffect(() => {
     getProductsDetails(productId);
-  }, []);
+  }, [productId]);
 
   useEffect(() => {
     setPrice(item.price * amount);
