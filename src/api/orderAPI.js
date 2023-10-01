@@ -1,13 +1,14 @@
 import axios from 'axios';
 
-export const cartOrderAPI = async (accessToken, requestBody) => {
+export const cartOrderAPI = async (accessToken, raw) => {
+  console.log('-> raw', raw);
   try {
     const response = await axios.post(
-      'https://openmarket.weniv.co.kr/order',
-      requestBody,
-
+      'https://openmarket.weniv.co.kr/order/',
+      raw,
       {
         headers: {
+          'Content-Type': 'application/json',
           Authorization: `JWT ${accessToken}`,
         },
       },
