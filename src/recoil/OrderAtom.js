@@ -9,6 +9,6 @@ const { persistAtom } = recoilPersist({
 
 export const orderItemAtom = atom({
   key: 'orderItemAtom',
-  default: { price: 0, items: [] },
+  default: { totalPrice: 0, productPrice: 0, deliveryFee: 0, items: [] },
   effects_UNSTABLE: [persistAtom],
 });
