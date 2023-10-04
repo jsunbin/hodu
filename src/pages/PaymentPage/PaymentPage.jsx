@@ -16,6 +16,7 @@ import {
   sumOrderTotalPriceSelector,
 } from '../../recoil/OrderAtom';
 import { cartOrderAPI } from '../../api/orderAPI';
+import { orderKindAtom } from '../../recoil/orderKindAtom';
 
 const INITIAL_VALUES = {
   product_id: 0,
@@ -37,6 +38,8 @@ export default function PaymentPage() {
   const [orderItems, setOrderItems] = useRecoilState(orderItemAtom);
   const [values, setValues] = useState(INITIAL_VALUES);
 
+  const [orderKind, setOrderKind] = useRecoilState(orderKindAtom);
+
   const handleChange = (name, value) => {
     setValues(prevValues => ({ ...prevValues, [name]: value }));
   };
@@ -56,10 +59,13 @@ export default function PaymentPage() {
   };
 
   useEffect(() => {
+    handleChange('order_kind', orderKind);
     handleChange('product_id', orderItems.items[0].product_id);
     handleChange('quantity', orderItems.items[0].totalAmount);
     handleChange('total_price', orderItems.totalPrice);
+    console.log(orderItems.totalPrice);
   }, []);
+
   return (
     <>
       <Header isLogin={isLogin} isSeller={isSeller} />
