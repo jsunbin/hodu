@@ -49,7 +49,8 @@ export default function ProductTableItemCart({ item }) {
       productId: item.product_id,
       cartItemId: item.cart_item_id,
       price: productTotalPrice(),
-      shippingFee: details.shipping_fee === 0 ? 0 : 2500,
+      amount: amount,
+      shippingFee: details.shipping_fee,
       isChecked: isChecked,
     };
 
@@ -121,7 +122,8 @@ export default function ProductTableItemCart({ item }) {
       productId: item.product_id,
       cartItemId: item.cart_item_id,
       price: item.quantity * details.price,
-      shippingFee: details.shipping_fee === 0 ? 0 : 2500,
+      amount: amount,
+      shippingFee: details.shipping_fee,
       isChecked: isChecked,
     };
 
