@@ -6,6 +6,7 @@ import NumDropDown from '../NumDropDown/NumDropDown';
 import CheckText from '../CheckText/CheckText';
 
 export default function JoinForm({ isSeller }) {
+  const [firstPhoneNum, setFirstPhoneNum] = useState('010');
   const [isClicked, setIsClicked] = useState(false);
 
   const phoneNumClickHandler = () => {
@@ -80,10 +81,57 @@ export default function JoinForm({ isSeller }) {
                   aria-controls="phoneStart"
                   aria-expanded={false}
                   onClick={phoneNumClickHandler}
+                  css={css`
+                    position: relative;
+                  `}
                 >
-                  010
+                  <span>{firstPhoneNum}</span>
+                  <span
+                    css={css`
+                      position: absolute;
+                      top: 16px;
+                      right: 14px;
+                    `}
+                  >
+                    {!isClicked ? (
+                      <svg
+                        width="22"
+                        height="22"
+                        viewBox="0 0 22 22"
+                        fill="none"
+                        xmlns="http://www.w3.org/2000/svg"
+                      >
+                        <path
+                          d="M17.4163 8.25005L10.9997 13.6583L4.58301 8.25005"
+                          stroke="#767676"
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                        />
+                      </svg>
+                    ) : (
+                      <svg
+                        width="22"
+                        height="22"
+                        viewBox="0 0 22 22"
+                        fill="none"
+                        xmlns="http://www.w3.org/2000/svg"
+                      >
+                        <path
+                          d="M4.58366 13.6583L11.0003 8.25006L17.417 13.6583"
+                          stroke="#767676"
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                        />
+                      </svg>
+                    )}
+                  </span>
                 </button>
-                {isClicked && <NumDropDown />}
+                {isClicked && (
+                  <NumDropDown
+                    onClick={setFirstPhoneNum}
+                    setIsClicked={setIsClicked}
+                  />
+                )}
                 <input
                   type="tel"
                   id="phoneNo"

@@ -2,36 +2,41 @@
 import React from 'react';
 import { css } from '@emotion/react';
 
-export default function NumDropDown() {
+export default function NumDropDown({ onClick, setIsClicked }) {
+  const handleItemClick = event => {
+    // console.log(event.target.innerText);
+    onClick(event.target.innerText);
+    setIsClicked(false);
+  };
   return (
     <ul css={ulStyles} role="menu" id="phoneStart" className="num-list">
       <li role="presentation">
-        <button type="button" role="menuitem">
+        <button type="button" role="menuitem" onClick={handleItemClick}>
           010
         </button>
       </li>
       <li role="presentation">
-        <button type="button" role="menuitem">
+        <button type="button" role="menuitem" onClick={handleItemClick}>
           011
         </button>
       </li>
       <li role="presentation">
-        <button type="button" role="menuitem">
+        <button type="button" role="menuitem" onClick={handleItemClick}>
           016
         </button>
       </li>
       <li role="presentation">
-        <button type="button" role="menuitem">
+        <button type="button" role="menuitem" onClick={handleItemClick}>
           017
         </button>
       </li>
       <li role="presentation">
-        <button type="button" role="menuitem">
+        <button type="button" role="menuitem" onClick={handleItemClick}>
           018
         </button>
       </li>
       <li role="presentation">
-        <button type="button" role="menuitem">
+        <button type="button" role="menuitem" onClick={handleItemClick}>
           019
         </button>
       </li>
