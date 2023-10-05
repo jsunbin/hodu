@@ -13,8 +13,12 @@ import { TokenAtom } from '../../../recoil/TokenAtom';
 import NoButtonModal from '../../Modal/NoButtonMoal/NoButtonModal';
 import { CheckedItemAtom } from '../../../recoil/CheckedItemAtom';
 import { AllCheckedAtom } from '../../../recoil/AllCheckedAtom';
+import { useNavigate } from 'react-router-dom';
+import { orderItemAtom } from '../../../recoil/OrderAtom';
+import { orderKindAtom } from '../../../recoil/orderKindAtom';
 
 export default function ProductTableItemCart({ item }) {
+  const navigate = useNavigate();
   const [details, setDetails] = useState([]);
   const [amount, setAmount] = useState(1);
   const [isAmountChanged, setIsAmountChanged] = useState(false);
@@ -26,11 +30,39 @@ export default function ProductTableItemCart({ item }) {
   const [checkedItem, setCheckedItem] = useRecoilState(CheckedItemAtom);
   const setCartItemIdToDelete = useSetRecoilState(cartItemIdToDeleteAtom);
   const setOpenModal = useSetRecoilState(openModalSelector);
+  const [orderItems, setOrderItems] = useRecoilState(orderItemAtom);
+  const [orderKind, setOrderKind] = useRecoilState(orderKindAtom);
 
   const productTotalPrice = () => {
     const { price } = details;
 
     return parseInt(price * amount);
+  };
+
+  // 아이템에서 주문하기 클릭했을 때
+  const handleOrderClick = event => {
+    // orderKind 설정
+    setOrderKind('cart_order');
+
+    // 버튼이 위치한 article을 찾아서 product_id 찾기
+    const article = event.target.closest('article');
+    const targetProductId = article.getAttribute('data-product-id');
+
+    // 위에서 찾은 product_id로 checkedItem 배열에서 해당하는 객체 찾기
+    const targetItem = checkedItem.find(
+      item => item.productId === parseInt(targetProductId),
+    );
+
+    // 주문페이지에서는 orderItems로 렌더링하므로 orderItems 아톰에 설정
+    setOrderItems({
+      totalPrice: productTotalPrice() + details.shipping_fee,
+      productPrice: productTotalPrice(),
+      deliveryFee: details.shipping_fee,
+      items: [{ ...details, totalAmount: amount }],
+    });
+
+    // 주문페이지로 이동
+    navigate('/payment');
   };
 
   const handleCheckBoxClick = event => {
@@ -49,7 +81,8 @@ export default function ProductTableItemCart({ item }) {
       productId: item.product_id,
       cartItemId: item.cart_item_id,
       price: productTotalPrice(),
-      shippingFee: details.shipping_fee === 0 ? 0 : 2500,
+      amount: amount,
+      shippingFee: details.shipping_fee,
       isChecked: isChecked,
     };
 
@@ -121,7 +154,8 @@ export default function ProductTableItemCart({ item }) {
       productId: item.product_id,
       cartItemId: item.cart_item_id,
       price: item.quantity * details.price,
-      shippingFee: details.shipping_fee === 0 ? 0 : 2500,
+      amount: amount,
+      shippingFee: details.shipping_fee,
       isChecked: isChecked,
     };
 
@@ -140,7 +174,7 @@ export default function ProductTableItemCart({ item }) {
 
   return (
     !isLoading && (
-      <article css={productItemArticleStyles}>
+      <article css={productItemArticleStyles} data-product-id={item.product_id}>
         <div css={css({ margin: '0 30px' })}>
           <label>
             <input
@@ -241,7 +275,7 @@ export default function ProductTableItemCart({ item }) {
 
         <div css={productTotalPriceStyles}>
           <span>{productTotalPrice().toLocaleString()}원</span>
-          <Button size="sm" width="130px">
+          <Button size="sm" width="130px" onClickEvent={handleOrderClick}>
             주문하기
           </Button>
         </div>

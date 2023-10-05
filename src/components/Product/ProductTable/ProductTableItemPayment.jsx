@@ -2,20 +2,29 @@
 import React from 'react';
 import { css } from '@emotion/react';
 
-export default function ProductTableItemPayment() {
+export default function ProductTableItemPayment({ item }) {
+  const shippingFee =
+    item.shipping_fee === 0
+      ? '무료배송'
+      : `${parseInt(item.shipping_fee).toLocaleString()}원`;
+
+  const totalItemPrice = parseInt(
+    item.price * item.totalAmount,
+  ).toLocaleString();
+
   return (
     <>
       <td colSpan={2}>
         <div css={productInfoDivStyles}>
-          <a href="/#">
-            <img src="https://picsum.photos/104" alt="상품이미지" />
+          <a href={`/product/${item.product_id}`}>
+            <img src={item.image} alt="상품이미지" />
           </a>
           <div css={productBasicInfoDivStyles}>
-            <span className="product-seller">백엔드 글로벌</span>
-            <a href="/#">
-              <strong className="product-name">딥러닝 개발자 무릎 담요</strong>
+            <span className="product-seller">{item.store_name}</span>
+            <a href={`/product/${item.product_id}`}>
+              <strong className="product-name">{item.product_name}</strong>
             </a>
-            <span className="product-amount">수량: 1개</span>
+            <span className="product-amount">수량: {item.totalAmount}개</span>
           </div>
         </div>
       </td>
@@ -23,10 +32,10 @@ export default function ProductTableItemPayment() {
         <div css={tdDivStyles}>-</div>
       </td>
       <td>
-        <div css={tdDivStyles}>무료배송</div>
+        <div css={tdDivStyles}>{shippingFee}</div>
       </td>
       <td>
-        <div css={priceStyles}>17,500원</div>
+        <div css={priceStyles}>{totalItemPrice}원</div>
       </td>
     </>
   );

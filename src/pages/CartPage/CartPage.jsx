@@ -15,8 +15,14 @@ import { closeModalSelector, modalStateAtom } from '../../recoil/ModalAtom';
 import Modal from '../../components/Modal/Modal';
 import { cartItemIdToDeleteAtom } from '../../recoil/CartItemIdToDeleteAtom';
 import { CheckedItemAtom } from '../../recoil/CheckedItemAtom';
+import { cartOrderAPI } from '../../api/orderAPI';
+import { useNavigate } from 'react-router-dom';
+import { orderItemAtom } from '../../recoil/OrderAtom';
+import { orderKindAtom } from '../../recoil/orderKindAtom';
+import { productsDetailAPI } from '../../api/productsAPI';
 
 export default function CartPage() {
+  const navigate = useNavigate();
   const accessToken = useRecoilValue(TokenAtom);
   const isLogin = useRecoilValue(isLoginSelector);
   const isSeller = useRecoilValue(isUserSeller);
@@ -27,6 +33,90 @@ export default function CartPage() {
 
   const [items, setItems] = useRecoilState(CartItemAtom);
   const [isLoading, setIsLoading] = useState(false);
+
+  const [orderItems, setOrderItems] = useRecoilState(orderItemAtom);
+  const [orderKind, setOrderKind] = useRecoilState(orderKindAtom);
+
+  // 하단 결제하기 클릭 이벤트
+  const handleOrderClick = async event => {
+    event.preventDefault();
+    console.log('결제하기');
+    console.log('-> items', items);
+    // orderKind 설정
+    setOrderKind('cart_order');
+
+    // orderItem 아톰 설정
+    // checkedItem에서 isChecked가 true인 값만 뽑아서
+    console.log('-> checkedItem', checkedItem);
+
+    for (let el of checkedItem) {
+      if (el.isChecked) {
+        // isChecked가 true 이면
+        const details = await getProductsDetails(el.productId);
+        console.log('dd', details);
+
+        // setOrderItems({});
+
+        setOrderItems(prev => {
+          const currentProductId = details.product_id;
+
+          const updatedItems = prev.items.filter(
+            item => item.product_id !== currentProductId,
+          );
+
+          const newItems = [
+            ...updatedItems,
+            {
+              ...details,
+              totalAmount: el.amount,
+            },
+          ];
+          console.log('-> newItems', newItems);
+
+          const productPrice = newItems.reduce((total, item) => {
+            return total + item.price * item.totalAmount;
+          }, 0);
+          const deliveryFee = newItems.reduce((total, item) => {
+            return total + item.shipping_fee;
+          }, 0);
+          const totalPrice = productPrice + deliveryFee;
+
+          console.log({
+            totalPrice,
+            productPrice,
+            deliveryFee,
+            items: newItems,
+          });
+
+          return {
+            totalPrice,
+            productPrice,
+            deliveryFee,
+            items: newItems,
+          };
+        });
+      }
+    }
+
+    navigate('/payment');
+
+    console.log(orderItems);
+  };
+
+  const getProductsDetails = async productId => {
+    try {
+      setIsLoading(true);
+
+      const data = await productsDetailAPI(productId);
+
+      console.log('상세: ', data);
+      setIsLoading(false);
+      return data.data;
+    } catch (error) {
+      setIsLoading(false);
+      console.error(error);
+    }
+  };
 
   // 모달에 전달할 상품 삭제
   const handleDeleteItemClick = () => {
@@ -75,7 +165,9 @@ export default function CartPage() {
               <>
                 <OrderTotalBox />
                 <div css={buttonWrapDivStyles}>
-                  <Button size="lg">주문하기</Button>
+                  <Button size="lg" onClickEvent={handleOrderClick}>
+                    주문하기
+                  </Button>
                 </div>
               </>
             ) : (

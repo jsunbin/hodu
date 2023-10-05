@@ -5,15 +5,20 @@ import ProductTableTitle from './ProductTableTitle';
 import ProductTbody from './ProductTbody';
 import { useRecoilValue } from 'recoil';
 import { CartItemAtom } from '../../../recoil/CartItemAtom';
+import { orderItemAtom } from '../../../recoil/OrderAtom';
 
 export default function ProductTable({ page = 'cart', isCheckBox = true }) {
   const items = useRecoilValue(CartItemAtom);
+  const orderItems = useRecoilValue(orderItemAtom);
+
+  const orderItemList = page === 'cart' ? items : orderItems.items;
 
   return (
     <table css={tableStyles({ page })} className={`${page}-table`}>
       <ProductTableTitle page={page} isCheckBox={isCheckBox} />
-      {items.length !== 0 ? (
-        <ProductTbody page={page} />
+
+      {orderItemList.length !== 0 ? (
+        <ProductTbody page={page} items={orderItemList} />
       ) : (
         <tbody>
           <tr>

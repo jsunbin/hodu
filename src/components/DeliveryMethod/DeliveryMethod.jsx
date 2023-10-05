@@ -8,7 +8,7 @@ export default function DeliveryMethod({
   shippingFee,
 }) {
   const deliveryMethod = shippingMethod === 'PARCEL' ? 'EMS' : '택배배송';
-  const deliveryFee = shippingFee === 0 ? '무료배송' : '2,500원';
+  const deliveryFee = shippingFee === 0 ? '무료배송' : `${shippingFee}원`;
 
   return (
     <span css={styles}>
