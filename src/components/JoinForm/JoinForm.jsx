@@ -49,6 +49,13 @@ export default function JoinForm({ isSeller }) {
     handleChange(name, value);
   };
 
+  const checkUserName = () => {
+    // 아이디를 입력하지 않고 비밀번호를 입력한 경우
+    if (values.username === '') {
+      setUserNameMessage({ message: '필수 정보입니다.', color: '#EB5757' });
+    }
+  };
+
   const checkPassword = event => {
     // 비밀번호 유효성 검사: 포커스 아웃 될 때 실행됨.
     const currentInputPassword1 = event.target.value;
@@ -86,11 +93,6 @@ export default function JoinForm({ isSeller }) {
         color: 'default',
         isValid: true,
       });
-    }
-
-    // 아이디를 입력하지 않고 비밀번호를 입력한 경우
-    if (values.username === '') {
-      setUserNameMessage({ message: '필수 정보입니다.', color: '#EB5757' });
     }
   };
 
@@ -141,9 +143,15 @@ export default function JoinForm({ isSeller }) {
   };
   const idValidClickHandler = event => {
     console.log('이메일 계정 검증');
+    var RegExp = /^[a-zA-Z0-9]{4,20}$/;
 
     if (values.username === '') {
       setUserNameMessage({ message: '필수 정보입니다.', color: '#EB5757' });
+    } else if (!RegExp.test(values.username)) {
+      setUserNameMessage({
+        message: '4 ~ 20자 이내의 영문 소문자, 대문자 숫자만 사용 가능합니다.',
+        color: '#EB5757',
+      });
     } else {
       userIdValid();
     }
@@ -198,6 +206,7 @@ export default function JoinForm({ isSeller }) {
                 name="password"
                 maxLength={20}
                 autoComplete="new-password"
+                onClick={checkUserName}
                 onChange={handleInputChange}
                 onBlur={checkPassword}
               />
