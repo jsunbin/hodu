@@ -6,6 +6,8 @@ import NumDropDown from '../NumDropDown/NumDropDown';
 import CheckText from '../CheckText/CheckText';
 import { accountsValid } from '../../api/signupAPI';
 import { useRecoilValue } from 'recoil';
+import checkOnIcon from '../../assets/images/icon-check-on.svg';
+import checkOffIcon from '../../assets/images/icon-check-off.svg';
 
 const INITIAL_VALUES = {
   username: '',
@@ -23,7 +25,15 @@ export default function JoinForm({ isSeller }) {
     message: null,
     color: 'default',
   });
-  const [passwordError, setPasswordError] = useState(null);
+  const [passwordValidError, setPasswordValidError] = useState({
+    message: null,
+    color: 'default',
+    isValid: false,
+  });
+  const [passwordError, setPasswordError] = useState({
+    message: null,
+    isSame: false,
+  });
 
   const phoneNumClickHandler = () => {
     setIsClicked(!isClicked);
@@ -39,19 +49,104 @@ export default function JoinForm({ isSeller }) {
     handleChange(name, value);
   };
 
-  const confirmPassword = event => {
-    handleInputChange(event);
-    const currentInputPassword2 = event.target.value;
-    if (values.password !== currentInputPassword2) {
-      setPasswordError('비밀번호가 일치하지 않습니다.');
+  const checkPassword = event => {
+    // 비밀번호 유효성 검사: 포커스 아웃 될 때 실행됨.
+    const currentInputPassword1 = event.target.value;
+
+    const reg =
+      /^(?=.*?[A-Z])(?=.*?[a-z])(?=.*?[0-9])(?=.*?[#?!@$%^&*-]).{8,}$/;
+    if (currentInputPassword1 === '') {
+      setPasswordValidError({
+        color: 'red',
+        message: '필수 정보입니다.',
+        isValid: false,
+      });
+    } else if (!reg.test(currentInputPassword1)) {
+      console.log('aa');
+      setPasswordValidError(prev => ({
+        color: 'red',
+        message: '8자 이상, 영문 대소문자, 숫자, 특수문자를 사용하세요.',
+        isValid: false,
+      }));
+    } else if (currentInputPassword1.length < 8) {
+      setPasswordValidError({
+        color: 'red',
+        message: '8자 이상 입력하세요',
+        isValid: false,
+      });
+    } else if (/\s/g.test(currentInputPassword1)) {
+      setPasswordValidError({
+        color: 'red',
+        message: '공백을 제거하세요.',
+        isValid: false,
+      });
     } else {
-      setPasswordError(null);
+      setPasswordValidError({
+        message: null,
+        color: 'default',
+        isValid: true,
+      });
+    }
+
+    // 아이디를 입력하지 않고 비밀번호를 입력한 경우
+    if (values.username === '') {
+      setUserNameMessage({ message: '필수 정보입니다.', color: '#EB5757' });
     }
   };
 
+  const confirmPassword = event => {
+    handleInputChange(event);
+    const currentInputPassword2 = event.target.value;
+
+    // 비밀번호가 일치하지 않을 경우
+    if (values.password !== currentInputPassword2) {
+      setPasswordError({
+        message: '비밀번호가 일치하지 않습니다.',
+        isSame: false,
+      });
+    } else {
+      // 비밀번호가 재확인 입력이 유효한 경우
+      setPasswordError({ message: null, isSame: true });
+    }
+
+    // '비밀번호'를 입력하지 않고 '비밀번호 재확인'을 입력한 경우
+    if (values.password === '') {
+      setPasswordValidError({
+        color: 'red',
+        message: '필수 정보입니다.',
+        isValid: false,
+      });
+    }
+  };
+
+  const checkPassword2 = () => {
+    if (values.username === '') {
+      setUserNameMessage({ message: '필수 정보입니다.', color: '#EB5757' });
+    }
+
+    if (values.password === '') {
+      setPasswordValidError({
+        color: 'red',
+        message: '필수 정보입니다.',
+        isValid: false,
+      });
+    }
+
+    if (values.password2 === '') {
+      setPasswordError({
+        message: '필수 정보입니다.',
+        isSame: false,
+      });
+    }
+  };
   const idValidClickHandler = event => {
     console.log('이메일 계정 검증');
-    userIdValid();
+
+    if (values.username === '') {
+      setUserNameMessage({ message: '필수 정보입니다.', color: '#EB5757' });
+    } else {
+      userIdValid();
+    }
   };
 
   const userIdValid = async () => {
@@ -104,9 +199,32 @@ export default function JoinForm({ isSeller }) {
                 maxLength={20}
                 autoComplete="new-password"
                 onChange={handleInputChange}
+                onBlur={checkPassword}
               />
-              <span className="password-filled"></span>
+              <span
+                css={css`
+                  position: absolute;
+                  right: 13px;
+                  bottom: 13px;
+                  width: 28px;
+                  height: 28px;
+                  display: inline-block;
+                  background: url(${passwordValidError.isValid
+                      ? checkOnIcon
+                      : checkOffIcon})
+                    center no-repeat;
+                `}
+                className="password-filled"
+              ></span>
             </div>
+            {!passwordValidError.isValid && (
+              <strong
+                css={warningStyles({ color: '#EB5757' })}
+                className="password-valid-error"
+              >
+                {passwordValidError.message}
+              </strong>
+            )}
             <div css={formItemDivStyles} className="form-item check-password">
               <label htmlFor="password2">비밀번호 재확인</label>
               <input
@@ -116,15 +234,30 @@ export default function JoinForm({ isSeller }) {
                 maxLength={20}
                 autoComplete="new-password"
                 onChange={confirmPassword}
+                onBlur={checkPassword2}
               />
-              {/*<span className="password-filled"></span>*/}
+              <span
+                css={css`
+                  position: absolute;
+                  right: 13px;
+                  bottom: 13px;
+                  width: 28px;
+                  height: 28px;
+                  display: inline-block;
+                  background: url(${passwordError.isSame
+                      ? checkOnIcon
+                      : checkOffIcon})
+                    center no-repeat;
+                `}
+                className="password-filled"
+              ></span>
             </div>
-            {passwordError && (
+            {passwordError.message && (
               <strong
                 css={warningStyles({ color: '#EB5757' })}
                 className="password-error"
               >
-                {passwordError}
+                {passwordError.message}
               </strong>
             )}
           </div>
@@ -331,6 +464,7 @@ const formItemDivStyles = css({
   flexDirection: 'column',
   gap: '10px',
   marginBottom: '12px',
+  position: 'relative',
   '&.user, &.business': {
     display: 'flex',
     flexDirection: 'row',
