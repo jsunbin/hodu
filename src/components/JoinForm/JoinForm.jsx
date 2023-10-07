@@ -1,5 +1,5 @@
 /** @jsxImportSource @emotion/react */
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { css } from '@emotion/react';
 import Button from '../Button/Button';
 import NumDropDown from '../NumDropDown/NumDropDown';
@@ -18,12 +18,15 @@ const INITIAL_VALUES = {
 };
 
 export default function JoinForm({ isSeller }) {
+  const [isChecked, setIsChecked] = useState(false);
+  const [isDisabled, setIsDisabled] = useState(true);
   const [values, setValues] = useState(INITIAL_VALUES);
   const [firstPhoneNum, setFirstPhoneNum] = useState('010');
   const [isClicked, setIsClicked] = useState(false);
   const [userNameMessage, setUserNameMessage] = useState({
     message: null,
     color: 'default',
+    isValid: false,
   });
   const [passwordValidError, setPasswordValidError] = useState({
     message: null,
@@ -34,6 +37,7 @@ export default function JoinForm({ isSeller }) {
     message: null,
     isSame: false,
   });
+  const [phoneNumber, setPhoneNumber] = useState([firstPhoneNum, '', '']);
 
   const phoneNumClickHandler = () => {
     setIsClicked(!isClicked);
@@ -52,7 +56,11 @@ export default function JoinForm({ isSeller }) {
   const checkUserName = () => {
     // 아이디를 입력하지 않고 비밀번호를 입력한 경우
     if (values.username === '') {
-      setUserNameMessage({ message: '필수 정보입니다.', color: '#EB5757' });
+      setUserNameMessage({
+        message: '필수 정보입니다.',
+        color: '#EB5757',
+        isValid: false,
+      });
     }
   };
 
@@ -123,7 +131,11 @@ export default function JoinForm({ isSeller }) {
 
   const checkPassword2 = () => {
     if (values.username === '') {
-      setUserNameMessage({ message: '필수 정보입니다.', color: '#EB5757' });
+      setUserNameMessage({
+        message: '필수 정보입니다.',
+        color: '#EB5757',
+        isValid: false,
+      });
     }
 
     if (values.password === '') {
@@ -146,11 +158,16 @@ export default function JoinForm({ isSeller }) {
     var RegExp = /^[a-zA-Z0-9]{4,20}$/;
 
     if (values.username === '') {
-      setUserNameMessage({ message: '필수 정보입니다.', color: '#EB5757' });
+      setUserNameMessage({
+        message: '필수 정보입니다.',
+        color: '#EB5757',
+        isValid: false,
+      });
     } else if (!RegExp.test(values.username)) {
       setUserNameMessage({
         message: '4 ~ 20자 이내의 영문 소문자, 대문자 숫자만 사용 가능합니다.',
         color: '#EB5757',
+        isValid: false,
       });
     } else {
       userIdValid();
@@ -161,17 +178,74 @@ export default function JoinForm({ isSeller }) {
     try {
       const response = await accountsValid(values.username);
       console.log(response);
-      setUserNameMessage({ message: response.Success, color: 'default' });
+      setUserNameMessage({
+        message: response.Success,
+        color: 'default',
+        isValid: true,
+      });
     } catch (e) {
       // console.error(e);
       const failMessage = e.response?.data?.FAIL_Message;
-      setUserNameMessage({ message: failMessage, color: '#EB5757' });
+      setUserNameMessage({
+        message: failMessage,
+        color: '#EB5757',
+        isValid: false,
+      });
     }
   };
 
+  // 휴대폰
+  const handleChangePhoneNumber = event => {
+    handleInputChange(event);
+    const { name, value } = event.target;
+    const nextPhoneNumber = [...phoneNumber];
+    console.log(nextPhoneNumber);
+
+    if (name === 'phoneNo2') {
+      nextPhoneNumber[1] = `${value}`;
+    } else if (name === 'phoneNo3') {
+      nextPhoneNumber[2] = `${value}`;
+    }
+
+    nextPhoneNumber[0] = `${firstPhoneNum}`;
+
+    setPhoneNumber(nextPhoneNumber);
+    handleChange('phone_number', nextPhoneNumber.join(''));
+  };
+
+  const handleSubmit = event => {
+    event.preventDefault();
+    console.log('가입하기');
+  };
+
+  useEffect(() => {
+    console.log(firstPhoneNum);
+    console.log(values.phone_number);
+
+    const newPhoneNumber = [...phoneNumber];
+    newPhoneNumber[0] = firstPhoneNum;
+    setPhoneNumber(newPhoneNumber);
+  }, [firstPhoneNum]);
+
+  useEffect(() => {
+    if (
+      userNameMessage.isValid &&
+      passwordValidError.isValid &&
+      passwordError.isSame &&
+      values.name !== '' &&
+      values.phone_number.length === 11 &&
+      !isChecked
+    ) {
+      console.log('Ok');
+      setIsDisabled(false);
+    } else {
+      setIsDisabled(true);
+    }
+  }, [values, isChecked]);
+
   return (
     <>
-      <form>
+      <form onSubmit={handleSubmit}>
         <section css={formStyles} className="form-content">
           <div
             css={formListDivStyles({ marginTop: '0' })}
@@ -277,7 +351,13 @@ export default function JoinForm({ isSeller }) {
               id="divName"
             >
               <label htmlFor="name">이름</label>
-              <input type="text" id="name" name="name" maxLength={40} />
+              <input
+                type="text"
+                id="name"
+                name="name"
+                maxLength={40}
+                onChange={handleInputChange}
+              />
             </div>
             <div
               css={formItemDivStyles}
@@ -345,17 +425,17 @@ export default function JoinForm({ isSeller }) {
                 )}
                 <input
                   type="tel"
-                  id="phoneNo"
-                  name="phoneNo"
+                  name="phoneNo2"
                   className="phone-input"
                   maxLength={4}
+                  onChange={handleChangePhoneNumber}
                 />
                 <input
                   type="tel"
-                  id="phoneNo"
-                  name="phoneNo"
+                  name="phoneNo3"
                   className="phone-input"
                   maxLength={4}
+                  onChange={handleChangePhoneNumber}
                 />
               </div>
             </div>
@@ -389,13 +469,13 @@ export default function JoinForm({ isSeller }) {
           )}
         </section>
 
-        <CheckText>
+        <CheckText setIsDisabled={setIsChecked}>
           호두샵의 <a href="/#">이용약관</a> 및{' '}
           <a href="/#">개인정보처리방침</a>에 대한 내용을 확인하였고 동의합니다.
         </CheckText>
 
         <div css={btnWrapDivStyles} className="btn-submit-wrap">
-          <Button size="md" type="submit" disabled={true}>
+          <Button size="md" type="submit" disabled={isDisabled}>
             가입하기
           </Button>
         </div>
