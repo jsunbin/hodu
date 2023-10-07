@@ -4,13 +4,56 @@ import { css } from '@emotion/react';
 import Button from '../Button/Button';
 import NumDropDown from '../NumDropDown/NumDropDown';
 import CheckText from '../CheckText/CheckText';
+import { accountsValid } from '../../api/signupAPI';
+import { useRecoilValue } from 'recoil';
+
+const INITIAL_VALUES = {
+  username: '',
+  password: '',
+  password2: '',
+  phone_number: '',
+  name: '',
+};
 
 export default function JoinForm({ isSeller }) {
+  const [values, setValues] = useState(INITIAL_VALUES);
   const [firstPhoneNum, setFirstPhoneNum] = useState('010');
   const [isClicked, setIsClicked] = useState(false);
+  const [userNameMessage, setUserNameMessage] = useState({
+    message: null,
+    color: 'default',
+  });
+  const [passwordError, setPasswordError] = useState(null);
 
   const phoneNumClickHandler = () => {
     setIsClicked(!isClicked);
+  };
+
+  const handleChange = (name, value) => {
+    setValues(prevValues => ({ ...prevValues, [name]: value }));
+    console.log(values);
+  };
+
+  const handleInputChange = event => {
+    const { name, value } = event.target;
+    handleChange(name, value);
+  };
+
+  const idValidClickHandler = event => {
+    console.log('이메일 계정 검증');
+    userIdValid();
+  };
+
+  const userIdValid = async () => {
+    try {
+      const response = await accountsValid(values.username);
+      console.log(response);
+      setUserNameMessage({ message: response.Success, color: 'default' });
+    } catch (e) {
+      // console.error(e);
+      const failMessage = e.response?.data?.FAIL_Message;
+      setUserNameMessage({ message: failMessage, color: '#EB5757' });
+    }
   };
 
   return (
@@ -26,15 +69,22 @@ export default function JoinForm({ isSeller }) {
                 <label htmlFor="id">아이디</label>
                 <input
                   type="text"
-                  id="id"
-                  name="id"
-                  className="id"
+                  id="userName"
+                  name="username"
                   maxLength={20}
                   autoCapitalize="off"
+                  onChange={handleInputChange}
                 />
               </div>
-              <Button size="ms">중복확인</Button>
+              <Button size="ms" onClickEvent={idValidClickHandler}>
+                중복확인
+              </Button>
             </div>
+            {userNameMessage.message && (
+              <strong css={warningStyles({ color: userNameMessage.color })}>
+                {userNameMessage.message}
+              </strong>
+            )}
             <div css={formItemDivStyles} className="form-item password">
               <label htmlFor="password">비밀번호</label>
               <input
@@ -55,10 +105,14 @@ export default function JoinForm({ isSeller }) {
                 maxLength={20}
                 autoComplete="new-password"
               />
-              <span className="password-filled"></span>
+              {/*<span className="password-filled"></span>*/}
             </div>
+            {passwordError && (
+              <strong css={warningStyles} className="password-error">
+                멋진 아이디네요 :)
+              </strong>
+            )}
           </div>
-
           <div css={formListDivStyles} className="form-list">
             <div
               css={formItemDivStyles}
@@ -192,6 +246,16 @@ export default function JoinForm({ isSeller }) {
     </>
   );
 }
+
+const warningStyles = props => css`
+  display: block;
+  color: ${props.color === 'default' ? '#21BF48' : props.color};
+  font-family: Spoqa Han Sans Neo;
+  font-size: 16px;
+  font-weight: 400;
+  line-height: normal;
+  margin-bottom: 12px;
+`;
 
 const formStyles = css({
   display: 'flex',
