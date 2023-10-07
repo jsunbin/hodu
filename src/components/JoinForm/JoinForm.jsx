@@ -39,6 +39,16 @@ export default function JoinForm({ isSeller }) {
     handleChange(name, value);
   };
 
+  const confirmPassword = event => {
+    handleInputChange(event);
+    const currentInputPassword2 = event.target.value;
+    if (values.password !== currentInputPassword2) {
+      setPasswordError('비밀번호가 일치하지 않습니다.');
+    } else {
+      setPasswordError(null);
+    }
+  };
+
   const idValidClickHandler = event => {
     console.log('이메일 계정 검증');
     userIdValid();
@@ -93,23 +103,28 @@ export default function JoinForm({ isSeller }) {
                 name="password"
                 maxLength={20}
                 autoComplete="new-password"
+                onChange={handleInputChange}
               />
               <span className="password-filled"></span>
             </div>
             <div css={formItemDivStyles} className="form-item check-password">
-              <label htmlFor="password">비밀번호 재확인</label>
+              <label htmlFor="password2">비밀번호 재확인</label>
               <input
                 type="password"
-                id="password"
-                name="password"
+                id="password2"
+                name="password2"
                 maxLength={20}
                 autoComplete="new-password"
+                onChange={confirmPassword}
               />
               {/*<span className="password-filled"></span>*/}
             </div>
             {passwordError && (
-              <strong css={warningStyles} className="password-error">
-                멋진 아이디네요 :)
+              <strong
+                css={warningStyles({ color: '#EB5757' })}
+                className="password-error"
+              >
+                {passwordError}
               </strong>
             )}
           </div>
