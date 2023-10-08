@@ -4,10 +4,11 @@ import { css } from '@emotion/react';
 import Button from '../Button/Button';
 import NumDropDown from '../NumDropDown/NumDropDown';
 import CheckText from '../CheckText/CheckText';
-import { accountsValid } from '../../api/signupAPI';
+import { accountsValid, signup } from '../../api/signupAPI';
 import { useRecoilValue } from 'recoil';
 import checkOnIcon from '../../assets/images/icon-check-on.svg';
 import checkOffIcon from '../../assets/images/icon-check-off.svg';
+import { useNavigate } from 'react-router-dom';
 
 const INITIAL_VALUES = {
   username: '',
@@ -18,6 +19,7 @@ const INITIAL_VALUES = {
 };
 
 export default function JoinForm({ isSeller }) {
+  const navigate = useNavigate();
   const [isChecked, setIsChecked] = useState(false);
   const [isDisabled, setIsDisabled] = useState(true);
   const [values, setValues] = useState(INITIAL_VALUES);
@@ -38,6 +40,7 @@ export default function JoinForm({ isSeller }) {
     isSame: false,
   });
   const [phoneNumber, setPhoneNumber] = useState([firstPhoneNum, '', '']);
+  const [phoneNumberError, setPhoneNumberError] = useState(null);
 
   const phoneNumClickHandler = () => {
     setIsClicked(!isClicked);
@@ -213,9 +216,22 @@ export default function JoinForm({ isSeller }) {
     handleChange('phone_number', nextPhoneNumber.join(''));
   };
 
-  const handleSubmit = event => {
+  const handleSubmit = async event => {
     event.preventDefault();
     console.log('가입하기');
+
+    try {
+      const response = await signup(values);
+      console.log(response);
+      console.log(response.statusText); // Created
+      const { name } = response.data;
+      navigate(`/welcome/${name}`);
+    } catch (e) {
+      // console.error(e);
+      const failMessage = e.response?.data?.phone_number[0];
+      setPhoneNumberError(failMessage);
+      console.log(failMessage);
+    }
   };
 
   useEffect(() => {
@@ -438,6 +454,11 @@ export default function JoinForm({ isSeller }) {
                   onChange={handleChangePhoneNumber}
                 />
               </div>
+              {phoneNumberError && (
+                <strong css={warningStyles({ color: '#EB5757' })}>
+                  {phoneNumberError}
+                </strong>
+              )}
             </div>
           </div>
 
