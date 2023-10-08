@@ -4,14 +4,17 @@ import { css } from '@emotion/react';
 
 export default function MoreList({ itemType = 'login' }) {
   const items = {
-    login: ['회원가입', '비밀번호 찾기'],
+    login: [
+      { title: '회원가입', url: '/signup' },
+      { title: '비밀번호 찾기', url: '/#' },
+    ],
     footer: [
-      '호두샵 소개',
-      '이용약관',
-      '개인정보처리방침',
-      '전자금융거래약관',
-      '청소년보호정책',
-      '제휴문의',
+      { title: '호두샵 소개', url: '/#' },
+      { title: '이용약관', url: '/#' },
+      { title: '개인정보처리방침', url: '/#' },
+      { title: '전자금융거래약관', url: '/#' },
+      { title: '청소년보호정책', url: '/#' },
+      { title: '제휴문의', url: '/#' },
     ],
   };
 
@@ -19,13 +22,13 @@ export default function MoreList({ itemType = 'login' }) {
     <ul css={itemType === 'login' ? loginListStyles : footerListStyles}>
       {items[itemType].map(item => {
         return (
-          <li key={item} css={liStyles}>
-            {item === '개인정보처리방침' ? (
+          <li key={item.title} css={liStyles}>
+            {item.title === '개인정보처리방침' ? (
               <a href="/#">
-                <strong>{item}</strong>
+                <strong>{item.title}</strong>
               </a>
             ) : (
-              <a href="/#">{item}</a>
+              <a href={item.url}>{item.title}</a>
             )}
           </li>
         );
