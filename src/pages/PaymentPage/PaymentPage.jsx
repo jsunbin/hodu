@@ -53,6 +53,7 @@ export default function PaymentPage() {
       const raw = JSON.stringify(values);
       const data = await cartOrderAPI(accessToken, raw);
       console.log(data);
+      navigate('/payment/success');
     } catch (error) {
       console.error(error);
     }
