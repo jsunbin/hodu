@@ -52,9 +52,10 @@ export default function LoginForm({ isSeller }) {
   // 로그인
   const login = async props => {
     try {
+      console.log('success');
       const data = await loginAPI(props);
       setAccessToken(data.data.token);
-      setUserLoginType(data.data.user_type === 'SELLER' ? true : false);
+      setUserLoginType(data.data.user_type === 'SELLER');
 
       navigate(from);
     } catch (error) {

@@ -143,6 +143,10 @@ export default function CartPage() {
       const { results } = data.data;
       setItems(results);
     } catch (error) {
+      if (error.response.status === 401) {
+        console.log('as');
+        navigate('/login');
+      }
       console.error(error);
     } finally {
       setIsLoading(false);

@@ -44,6 +44,8 @@ export default function ProductDetailsPage() {
     const data = await getCartList(accessToken);
     console.log('ss:', data);
 
+    if (!data) return;
+
     const { results } = data.data;
 
     console.log('results, ', results);
@@ -109,6 +111,11 @@ export default function ProductDetailsPage() {
       console.log(data);
       return data;
     } catch (error) {
+      if (error.response.status === 401) {
+        console.log('as');
+        navigate('/login');
+        return;
+      }
       console.error(error);
     }
   };
