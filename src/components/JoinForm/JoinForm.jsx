@@ -228,6 +228,22 @@ export default function JoinForm({ isSeller }) {
 
   // 사업자번호 인증
   const isCompanyRegistrationNumberValid = async () => {
+    if (values['company_registration_number'].length === 10) {
+      setCompanyRegistrationNumber(prev => ({
+        ...prev,
+        message: null,
+        isValid: false,
+      }));
+      return;
+    } else {
+      setCompanyRegistrationNumber(prev => ({
+        ...prev,
+        message: '형식에 맞지 않습니다',
+        isValid: false,
+      }));
+      return;
+    }
+
     try {
       const response = await companyRegistrationNumberValid({
         company_registration_number: values['company_registration_number'],
