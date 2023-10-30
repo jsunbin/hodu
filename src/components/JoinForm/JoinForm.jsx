@@ -4,7 +4,11 @@ import { css } from '@emotion/react';
 import Button from '../Button/Button';
 import NumDropDown from '../NumDropDown/NumDropDown';
 import CheckText from '../CheckText/CheckText';
-import { accountsValid, signup } from '../../api/signupAPI';
+import {
+  accountsValid,
+  companyRegistrationNumberValid,
+  signup,
+} from '../../api/signupAPI';
 import { useRecoilValue } from 'recoil';
 import checkOnIcon from '../../assets/images/icon-check-on.svg';
 import checkOffIcon from '../../assets/images/icon-check-off.svg';
@@ -41,6 +45,12 @@ export default function JoinForm({ isSeller }) {
   });
   const [phoneNumber, setPhoneNumber] = useState([firstPhoneNum, '', '']);
   const [phoneNumberError, setPhoneNumberError] = useState(null);
+  const [companyRegistrationNumber, setCompanyRegistrationNumber] = useState({
+    message: null,
+    color: '#EB5757',
+    isValid: false,
+  });
+  const [storeNameError, setStoreNameError] = useState(null);
 
   const phoneNumClickHandler = () => {
     setIsClicked(!isClicked);
@@ -199,7 +209,7 @@ export default function JoinForm({ isSeller }) {
 
   // 휴대폰
   const handleChangePhoneNumber = event => {
-    handleInputChange(event);
+    // handleInputChange(event);
     const { name, value } = event.target;
     const nextPhoneNumber = [...phoneNumber];
     console.log(nextPhoneNumber);
@@ -216,21 +226,65 @@ export default function JoinForm({ isSeller }) {
     handleChange('phone_number', nextPhoneNumber.join(''));
   };
 
+  // 사업자번호 인증
+  const isCompanyRegistrationNumberValid = async () => {
+    try {
+      const response = await companyRegistrationNumberValid({
+        company_registration_number: values['company_registration_number'],
+      });
+
+      console.log(response);
+      if (response.status === 202) {
+        setCompanyRegistrationNumber(prev => ({
+          ...prev,
+          message: null,
+          isValid: true,
+        }));
+      }
+    } catch (e) {
+      const { data } = e.response;
+
+      const failMessage = data['FAIL_Message'];
+
+      if (failMessage === '이미 등록된 사업자등록번호입니다.') {
+        setCompanyRegistrationNumber(prev => ({
+          ...prev,
+          message: '해당 사업자등록번호는 이미 존재합니다.',
+          isValid: false,
+        }));
+      } else if (
+        failMessage === 'company_registration_number 필드를 추가해주세요 :)'
+      ) {
+        setCompanyRegistrationNumber(prev => ({
+          ...prev,
+          message: '사업자등록번호를 입력해주세요.',
+          isValid: false,
+        }));
+      }
+    }
+  };
+
   const handleSubmit = async event => {
     event.preventDefault();
     console.log('가입하기');
 
+    const endpoint = isSeller ? '/accounts/signup_seller/' : 'accounts/signup/';
+
     try {
-      const response = await signup(values);
-      console.log(response);
-      console.log(response.statusText); // Created
-      const { name } = response.data;
-      navigate(`/welcome/${name}`);
+      const response = await signup(endpoint, values);
+      const { name, store_name } = response.data;
+      navigate(`/welcome/${isSeller ? store_name : name}`);
     } catch (e) {
-      // console.error(e);
-      const failMessage = e.response?.data?.phone_number[0];
-      setPhoneNumberError(failMessage);
-      console.log(failMessage);
+      console.error(e);
+
+      let failMessage = '';
+      if (e.response.data.phone_number) {
+        failMessage = e.response?.data?.phone_number[0];
+        setPhoneNumberError(failMessage);
+      } else if (e.response.data.store_name) {
+        failMessage = e.response?.data?.store_name[0];
+        setStoreNameError(failMessage);
+      }
     }
   };
 
@@ -468,22 +522,38 @@ export default function JoinForm({ isSeller }) {
                 <div css={idInputStyles}>
                   <label htmlFor="businessId">사업자 등록번호</label>
                   <input
-                    type="number"
+                    type="tel"
                     id="businessId"
-                    name="businessId"
+                    name="company_registration_number"
                     className="business-id"
                     maxLength={10}
+                    onChange={handleInputChange}
                   />
                 </div>
-                <Button size="ms">인증</Button>
+                <Button
+                  size="ms"
+                  onClickEvent={isCompanyRegistrationNumberValid}
+                >
+                  인증
+                </Button>
               </div>
+              {companyRegistrationNumber.message && (
+                <strong
+                  css={warningStyles({
+                    color: companyRegistrationNumber.color,
+                  })}
+                >
+                  {companyRegistrationNumber.message}
+                </strong>
+              )}
               <div css={formItemDivStyles} className="form-item store-name">
                 <label htmlFor="password">스토어 이름</label>
                 <input
                   type="text"
                   id="storeName"
-                  name="storeName"
+                  name="store_name"
                   maxLength={20}
+                  onChange={handleInputChange}
                 />
               </div>
             </div>
