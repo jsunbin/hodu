@@ -1,0 +1,21 @@
+{
+  "count": 1,
+  "next": null,
+  "previous": null,
+  "results": [
+    {
+      "product_id": 160,
+      "created_at": "2023-10-31T16:29:12.581824",
+      "updated_at": "2023-10-31T18:29:38.686114",
+      "product_name": "말차 초코칩 쿠키",
+      "image": "https://openmarket.weniv.co.kr/media/products/2023/10/31/ee8073c6-c2ec-4436-ae5f-84decaa19e52.png",
+      "price": 2000,
+      "shipping_method": "PARCEL",
+      "shipping_fee": 2500,
+      "stock": 20,
+      "product_info": "말차의 쌉싸름함과 초코칩의 달콤함이 어우러지는 쿠키입니다~~",
+      "seller": 3,
+      "store_name": "seller1's store"
+    }
+  ]
+}
