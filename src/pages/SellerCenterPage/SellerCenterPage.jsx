@@ -7,6 +7,44 @@ import SideMenuItem from '../../components/Button/SideMenuItem';
 import Button from '../../components/Button/Button';
 import mock from '../../data/sellerMock.json';
 
+function OnSaleItem({ item }) {
+  const { product_id, image, product_name, stock, price } = item;
+
+  return (
+    <article css={itemArticleStyles} data-id={product_id}>
+      <div css={itemInfoDivStyles}>
+        <img css={itemPreviewImgStyles} src={image} alt={product_name} />
+        <div>
+          <span css={itemNameSpanStyles}>{product_name}</span>
+          <span css={itemsStockSpanStyles}>재고: {stock}개</span>
+        </div>
+      </div>
+      <div css={itemPriceDivStyles}>{price.toLocaleString()}원</div>
+      <div css={itemEditDivStyles}>
+        <Button size="sm">수정</Button>
+      </div>
+      <div css={itemDeleteDivStyles}>
+        <Button size="sm" color="white">
+          삭제
+        </Button>
+      </div>
+    </article>
+  );
+}
+
+function OnSaleItemList() {
+  const rawItems = mock.results;
+  return (
+    <ul>
+      {rawItems.map(item => (
+        <li key={item.product_id}>
+          <OnSaleItem item={item} />
+        </li>
+      ))}
+    </ul>
+  );
+}
+
 export default function SellerCenterPage() {
   return (
     <>
@@ -60,7 +98,9 @@ export default function SellerCenterPage() {
                 <div css={editDivStyles}>수정</div>
                 <div css={deleteDivStyles}>삭제</div>
               </div>
-              <div css={contentsAreaDivStyles}></div>
+              <div>
+                <OnSaleItemList />
+              </div>
             </div>
           </section>
 
@@ -93,21 +133,86 @@ export default function SellerCenterPage() {
   );
 }
 
+const itemDeleteDivStyles = css`
+  flex: 1 1 10%;
+
+  text-align: center;
+`;
+
+const itemEditDivStyles = css`
+  flex: 1 1 10%;
+
+  text-align: center;
+`;
+
+const itemPriceDivStyles = css`
+  flex: 1 1 30%;
+
+  text-align: center;
+`;
+
+const itemNameSpanStyles = css`
+  display: block;
+  color: #000;
+  font-family: Spoqa Han Sans Neo;
+  font-size: 18px;
+  font-style: normal;
+  font-weight: 400;
+  line-height: 22px; /* 122.222% */
+  margin-bottom: 10px;
+  text-align: left;
+`;
+
+const itemsStockSpanStyles = css`
+  display: block;
+  color: #767676;
+  font-family: Spoqa Han Sans Neo;
+  font-size: 16px;
+  font-style: normal;
+  font-weight: 400;
+  line-height: normal;
+  text-align: left;
+`;
+
+const itemInfoDivStyles = css`
+  display: flex;
+  justify-content: flex-start;
+  align-items: center;
+  flex: 1 1 50%;
+`;
+
+const itemArticleStyles = css`
+  width: 100%;
+  background: #ffffff;
+  display: flex;
+  align-items: center;
+  justify-content: space-around;
+  border-bottom: 1px solid #c4c4c4;
+  padding: 16px 30px;
+`;
+
+const itemPreviewImgStyles = css`
+  width: 70px;
+  height: 70px;
+  border-radius: 50%;
+  margin-right: 30px;
+`;
+
 const productInfoDivStyles = css`
-  flex-grow: 5;
+  flex: 1 1 50%;
 `;
 const priceDivStyles = css`
-  flex-grow: 3;
+  flex: 1 1 30%;
 `;
 
 const editDivStyles = css`
-  padding: 10px 25px;
-  flex-grow: 1;
+  padding: 10px 15px;
+  flex: 1 1 10%;
 `;
 
 const deleteDivStyles = css`
-  padding: 10px 25px;
-  flex-grow: 1;
+  padding: 10px 15px;
+  flex: 1 1 10%;
 `;
 
 const contentsHeaderDivStyles = css`
@@ -133,15 +238,15 @@ const containerSectionStyles = css`
   border-radius: 5px;
   border: 1px solid #c4c4c4;
   background: #f2f2f2;
-  flex-shrink: 1;
-  flex-grow: 1;
-  flex-basis: auto;
+  flex: 1 1 auto;
   width: 100%;
-  min-height: 600px;
+  height: 100vh;
+  overflow: scroll;
 `;
 
 const sideMenuListStyles = css`
   margin-right: 30px;
+
   li {
     margin-bottom: 10px;
   }
