@@ -1,10 +1,10 @@
 /** @jsxImportSource @emotion/react */
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { css } from '@emotion/react';
 import SideMenuItem from '../../components/Button/SideMenuItem';
 import Button from '../../components/Button/Button';
-import mock from '../../data/sellerMock.json';
 import SellerHeader from '../../components/common/Header/SellerHeader';
+import { getSellersProducts } from '../../api/sellerAPI';
 
 function OnSaleItem({ item }) {
   const { product_id, image, product_name, stock, price } = item;
@@ -31,11 +31,10 @@ function OnSaleItem({ item }) {
   );
 }
 
-function OnSaleItemList() {
-  const rawItems = mock.results;
+function OnSaleItemList({ items }) {
   return (
     <ul>
-      {rawItems.map(item => (
+      {items.map(item => (
         <li key={item.product_id}>
           <OnSaleItem item={item} />
         </li>
@@ -45,6 +44,21 @@ function OnSaleItemList() {
 }
 
 export default function SellerCenterPage() {
+  const [items, setItems] = useState([]);
+  const handleLoad = async () => {
+    try {
+      const response = await getSellersProducts();
+      const { results } = response;
+      setItems(results);
+    } catch (e) {
+      console.log(e);
+    }
+  };
+
+  useEffect(() => {
+    handleLoad();
+  }, []);
+
   return (
     <>
       <SellerHeader />
@@ -56,7 +70,7 @@ export default function SellerCenterPage() {
           </h2>
 
           <div>
-            <Button size="ms" icon={true}>
+            <Button size="ms" icon={true} href={'/new-product'}>
               <svg
                 width="32"
                 height="32"
@@ -91,7 +105,7 @@ export default function SellerCenterPage() {
                 <div css={deleteDivStyles}>삭제</div>
               </div>
               <div>
-                <OnSaleItemList />
+                <OnSaleItemList items={items} />
               </div>
             </div>
           </section>
