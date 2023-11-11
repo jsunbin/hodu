@@ -12,3 +12,15 @@ export const getSellersProducts = async () => {
     console.log(e);
   }
 };
+
+// 상품 삭제하기
+export const deleteProduct = async productId => {
+  try {
+    const response = await authInstance.delete(`/products/${productId}`);
+    console.log(response);
+    return response;
+  } catch (e) {
+    console.log(e);
+    throw e;
+  }
+};
