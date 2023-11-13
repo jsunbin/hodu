@@ -1,13 +1,29 @@
 /** @jsxImportSource @emotion/react */
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { css } from '@emotion/react';
 import SideMenuItem from '../../components/Button/SideMenuItem';
 import Button from '../../components/Button/Button';
-import mock from '../../data/sellerMock.json';
 import SellerHeader from '../../components/common/Header/SellerHeader';
+import { deleteProduct, getSellersProducts } from '../../api/sellerAPI';
+import { useParams } from 'react-router-dom';
+import { useRecoilValue, useSetRecoilState } from 'recoil';
+import {
+  closeModalSelector,
+  modalStateAtom,
+  openModalSelector,
+} from '../../recoil/ModalAtom';
+import Modal from '../../components/Modal/Modal';
 
-function OnSaleItem({ item }) {
+function OnSaleItem({ item, setProductIdToDelete }) {
   const { product_id, image, product_name, stock, price } = item;
+  const setOpenModal = useSetRecoilState(openModalSelector);
+
+  // 삭제 버튼 클릭 이벤트
+  const handleDeleteClick = () => {
+    console.log('삭제?');
+    setProductIdToDelete(product_id);
+    setOpenModal();
+  };
 
   return (
     <article css={itemArticleStyles} data-id={product_id}>
@@ -20,10 +36,12 @@ function OnSaleItem({ item }) {
       </div>
       <div css={itemPriceDivStyles}>{price.toLocaleString()}원</div>
       <div css={itemEditDivStyles}>
-        <Button size="sm">수정</Button>
+        <Button href={`/products/${product_id}`} size="sm">
+          수정
+        </Button>
       </div>
       <div css={itemDeleteDivStyles}>
-        <Button size="sm" color="white">
+        <Button onClickEvent={handleDeleteClick} size="sm" color="white">
           삭제
         </Button>
       </div>
@@ -31,13 +49,12 @@ function OnSaleItem({ item }) {
   );
 }
 
-function OnSaleItemList() {
-  const rawItems = mock.results;
+function OnSaleItemList({ items, setProductIdToDelete }) {
   return (
     <ul>
-      {rawItems.map(item => (
+      {items.map(item => (
         <li key={item.product_id}>
-          <OnSaleItem item={item} />
+          <OnSaleItem item={item} setProductIdToDelete={setProductIdToDelete} />
         </li>
       ))}
     </ul>
@@ -45,6 +62,42 @@ function OnSaleItemList() {
 }
 
 export default function SellerCenterPage() {
+  const { productId } = useParams();
+  const setCloseModal = useSetRecoilState(closeModalSelector);
+
+  const [items, setItems] = useState([]);
+  const modalState = useRecoilValue(modalStateAtom);
+  const [productIdToDelete, setProductIdToDelete] = useState(null);
+
+  // 삭제 확인 모달에서 확인 버튼 클릭 이벤트
+  const handleDelete = async () => {
+    console.log('삭제!');
+    try {
+      const response = await deleteProduct(productIdToDelete);
+      console.log(response);
+      setItems(prevItems =>
+        prevItems.filter(item => item['product_id'] !== productIdToDelete),
+      );
+      setCloseModal();
+    } catch (e) {
+      console.log(e);
+    }
+  };
+
+  const handleLoad = async () => {
+    try {
+      const response = await getSellersProducts();
+      const { results } = response;
+      setItems(results);
+    } catch (e) {
+      console.log(e);
+    }
+  };
+
+  useEffect(() => {
+    handleLoad();
+  }, []);
+
   return (
     <>
       <SellerHeader />
@@ -56,7 +109,7 @@ export default function SellerCenterPage() {
           </h2>
 
           <div>
-            <Button size="ms" icon={true}>
+            <Button size="ms" icon={true} href={'/products/new'}>
               <svg
                 width="32"
                 height="32"
@@ -91,7 +144,10 @@ export default function SellerCenterPage() {
                 <div css={deleteDivStyles}>삭제</div>
               </div>
               <div>
-                <OnSaleItemList />
+                <OnSaleItemList
+                  items={items}
+                  setProductIdToDelete={setProductIdToDelete}
+                />
               </div>
             </div>
           </section>
@@ -120,6 +176,10 @@ export default function SellerCenterPage() {
             </ul>
           </nav>
         </div>
+
+        {modalState.isOpen && (
+          <Modal yesOnClickEvent={handleDelete}>상품을 삭제하시겠습니까?</Modal>
+        )}
       </main>
     </>
   );
