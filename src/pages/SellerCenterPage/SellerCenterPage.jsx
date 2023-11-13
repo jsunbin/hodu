@@ -36,7 +36,9 @@ function OnSaleItem({ item, setProductIdToDelete }) {
       </div>
       <div css={itemPriceDivStyles}>{price.toLocaleString()}원</div>
       <div css={itemEditDivStyles}>
-        <Button size="sm">수정</Button>
+        <Button href={`/products/${product_id}`} size="sm">
+          수정
+        </Button>
       </div>
       <div css={itemDeleteDivStyles}>
         <Button onClickEvent={handleDeleteClick} size="sm" color="white">
