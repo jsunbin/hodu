@@ -1,10 +1,56 @@
 /** @jsxImportSource @emotion/react */
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { css } from '@emotion/react';
 import Button from '../../components/Button/Button';
 import SellerHeader from '../../components/common/Header/SellerHeader';
+import { useNavigate, useParams } from 'react-router-dom';
+import { productsDetailAPI } from '../../api/productsAPI';
 
 export default function MakeProductPage() {
+  const navigate = useNavigate();
+  const [values, setValues] = useState({
+    product_name: '',
+    image: '',
+    price: 0,
+    shipping_method: 'PARCEL',
+    shipping_fee: 0,
+    stock: 0,
+    product_info: '',
+  });
+
+  const [buttonColor, setButtonColor] = useState({
+    parcel: 'default',
+    delivery: 'white',
+  });
+
+  const handleChange = event => {
+    const { name, value } = event.target;
+    handleValues(name, value);
+  };
+
+  const handleValues = (name, value) => {
+    console.log(name, value);
+    setValues(prev => ({ ...prev, [name]: value }));
+
+    console.log(values);
+  };
+
+  // 배송방법
+  const handleShippingMethod = (event, option) => {
+    event.preventDefault();
+    setButtonColor(prev => {
+      // 모든 값을 'white'로 초기화
+      const updatedColors = Object.fromEntries(
+        Object.keys(prev).map(key => [key, 'white']),
+      );
+      // 선택한 option만 'default'로 설정
+      updatedColors[option] = 'default';
+      return updatedColors;
+    });
+
+    handleValues('shipping_method', option.toUpperCase());
+  };
+
   return (
     <>
       <SellerHeader />
@@ -76,7 +122,13 @@ export default function MakeProductPage() {
                   <div>
                     <span css={titleSpanStyles}>상품명</span>
                     <label>
-                      <input type="text" css={titleInputStyles} />
+                      <input
+                        type="text"
+                        css={titleInputStyles}
+                        name={'product_name'}
+                        value={values.product_name}
+                        onChange={handleChange}
+                      />
                     </label>
                   </div>
                 </li>
@@ -90,6 +142,9 @@ export default function MakeProductPage() {
                             type="text"
                             inputMode={'numeric'}
                             css={numberInputStyles}
+                            name={'price'}
+                            value={values.price}
+                            onChange={handleChange}
                           />
                         </label>
                       </div>
@@ -101,13 +156,33 @@ export default function MakeProductPage() {
                 <li>
                   <div>
                     <span css={titleSpanStyles}>배송방법</span>
-                    <div css={shippingMethodWrapDivStyles}>
-                      <Button size="ms" width="220px" color={'default'}>
-                        택배, 소포, 등기
-                      </Button>
-                      <Button size="ms" width="220px" color={'white'}>
-                        직접배송(화물배달)
-                      </Button>
+                    <div>
+                      <ul css={shippingMethodListStyles}>
+                        <li>
+                          <Button
+                            size="ms"
+                            width="220px"
+                            color={buttonColor.parcel}
+                            onClickEvent={event =>
+                              handleShippingMethod(event, 'parcel')
+                            }
+                          >
+                            택배, 소포, 등기
+                          </Button>
+                        </li>
+                        <li>
+                          <Button
+                            size="ms"
+                            width="220px"
+                            color={buttonColor.delivery}
+                            onClickEvent={event =>
+                              handleShippingMethod(event, 'delivery')
+                            }
+                          >
+                            직접배송(화물배달)
+                          </Button>
+                        </li>
+                      </ul>
                     </div>
                   </div>
                 </li>
@@ -121,6 +196,9 @@ export default function MakeProductPage() {
                             type="text"
                             inputMode={'numeric'}
                             css={numberInputStyles}
+                            name={'shipping_fee'}
+                            value={values.shipping_fee}
+                            onChange={handleChange}
                           />
                         </label>
                       </div>
@@ -139,6 +217,9 @@ export default function MakeProductPage() {
                             type="text"
                             inputMode={'numeric'}
                             css={numberInputStyles}
+                            name={'stock'}
+                            value={values.stock}
+                            onChange={handleChange}
                           />
                         </label>
                       </div>
@@ -152,12 +233,25 @@ export default function MakeProductPage() {
           </div>
           <div css={contentDetailsDivStyles}>
             <span css={titleSpanStyles}>상품 상세정보</span>
-            <div css={productDetailInputStyles}></div>
+            <div css={productDetailInputStyles}>
+              <input
+                name={'product_info'}
+                value={values.product_info}
+                onChange={handleChange}
+                css={inputStyles}
+                // style={{ display: 'none' }}
+              />
+            </div>
           </div>
         </div>
 
         <div css={btnGroupDivStyles}>
-          <Button href={'/seller-center'} size="ms" width="200px" color="white">
+          <Button
+            onClickEvent={() => navigate(-1)}
+            size="ms"
+            width="200px"
+            color="white"
+          >
             취소
           </Button>
           <Button size="ms" width="200px" type="submit">
@@ -303,9 +397,13 @@ const unitSpanStyles = css`
   right: -1px;
 `;
 
-const shippingMethodWrapDivStyles = css`
+const shippingMethodListStyles = css`
   display: flex;
   gap: 10px;
+
+  li {
+    margin-bottom: 0;
+  }
 `;
 
 const contentDetailsDivStyles = css``;
@@ -324,4 +422,12 @@ const btnGroupDivStyles = css`
   justify-content: flex-end;
   align-items: center;
   gap: 14px;
+`;
+
+const inputStyles = css`
+  width: inherit;
+  height: inherit;
+  background: transparent;
+  outline: none;
+  border: none;
 `;
