@@ -1,5 +1,5 @@
 /** @jsxImportSource @emotion/react */
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { css } from '@emotion/react';
 import Button from '../../components/Button/Button';
 import SellerHeader from '../../components/common/Header/SellerHeader';
@@ -23,6 +23,9 @@ export default function MakeProductPage() {
     delivery: 'white',
   });
 
+  const [preview, setPreview] = useState();
+  const inputRef = useRef();
+
   const handleChange = event => {
     const { name, value } = event.target;
     handleValues(name, value);
@@ -34,6 +37,27 @@ export default function MakeProductPage() {
 
     console.log(values);
   };
+
+  // 파일 input
+  const handleFileInput = event => {
+    console.log(event);
+    const nextValue = event.target.files[0];
+    console.log(nextValue);
+    handleValues('image', nextValue);
+  };
+
+  useEffect(() => {
+    console.log(!values.image);
+    if (!values.image) return;
+
+    const nextPreview = URL.createObjectURL(values.image);
+    setPreview(nextPreview);
+
+    return () => {
+      setPreview();
+      URL.revokeObjectURL(nextPreview);
+    };
+  }, [values.image]);
 
   // 배송방법
   const handleShippingMethod = (event, option) => {
@@ -80,9 +104,25 @@ export default function MakeProductPage() {
           <div css={contentInfoDivStyles}>
             <div className={'content-left'} css={leftContentDivStyles}>
               <span css={titleSpanStyles}>상품 이미지</span>
+
               <label css={productImgLabelStyles}>
-                <input type="file" style={{ display: 'none' }} />
-                <span>
+                {preview && (
+                  <img
+                    src={preview}
+                    accept="image/png, image/jpeg"
+                    alt="이미지 미리보기"
+                    style={{ display: 'block', width: '100%', height: '100%' }}
+                  />
+                )}
+
+                <input
+                  type="file"
+                  name="image"
+                  onChange={event => handleFileInput(event)}
+                  ref={inputRef}
+                  style={{ display: 'none' }}
+                />
+                <span css={imageIconSpanStyles}>
                   <svg
                     width="50"
                     height="50"
@@ -317,10 +357,16 @@ const productImgLabelStyles = css`
   width: 500px;
   height: 500px;
   background: #c4c4c4;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  display: block;
   cursor: pointer;
+  position: relative;
+`;
+
+const imageIconSpanStyles = css`
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translateX(-50%);
 `;
 
 const rightContentDivStyles = css`
