@@ -8,6 +8,7 @@ import { productsDetailAPI } from '../../api/productsAPI';
 
 export default function MakeProductPage() {
   const navigate = useNavigate();
+  const [inputCount, setInputCount] = useState(0);
   const [values, setValues] = useState({
     product_name: '',
     image: '',
@@ -17,12 +18,10 @@ export default function MakeProductPage() {
     stock: 0,
     product_info: '',
   });
-
   const [buttonColor, setButtonColor] = useState({
     parcel: 'default',
     delivery: 'white',
   });
-
   const [preview, setPreview] = useState();
   const inputRef = useRef();
 
@@ -36,6 +35,10 @@ export default function MakeProductPage() {
     setValues(prev => ({ ...prev, [name]: value }));
 
     console.log(values);
+  };
+
+  const handleCount = event => {
+    setInputCount(event.target.value.length);
   };
 
   // 파일 input
@@ -161,14 +164,21 @@ export default function MakeProductPage() {
                 <li>
                   <div>
                     <span css={titleSpanStyles}>상품명</span>
-                    <label>
+                    <label css={titleLabelStyles}>
                       <input
                         type="text"
                         css={titleInputStyles}
                         name={'product_name'}
                         value={values.product_name}
-                        onChange={handleChange}
+                        onChange={event => {
+                          handleChange(event);
+                          handleCount(event);
+                        }}
+                        maxLength={20}
                       />
+                      <span css={titleInputCountSpanStyles}>
+                        {inputCount}/20
+                      </span>
                     </label>
                   </div>
                 </li>
@@ -390,8 +400,12 @@ const titleSpanStyles = css`
   margin-bottom: 10px;
 `;
 
+const titleLabelStyles = css`
+  position: relative;
+`;
+
 const titleInputStyles = css`
-  width: calc(100% - 34px);
+  width: calc(100% - 89px);
   color: #000;
   font-family: Spoqa Han Sans Neo;
   font-size: 16px;
@@ -401,7 +415,20 @@ const titleInputStyles = css`
   border-radius: 5px;
   border: 1px solid var(--C4C4C4, #c4c4c4);
   outline: none;
-  padding: 17px;
+  padding: 17px 70px 17px 17px;
+`;
+
+const titleInputCountSpanStyles = css`
+  color: #c4c4c4;
+  font-family: Spoqa Han Sans Neo;
+  font-size: 14px;
+  font-style: normal;
+  font-weight: 400;
+  line-height: normal;
+
+  position: absolute;
+  top: 0;
+  right: 16px;
 `;
 
 const numberInputDivStyles = css`
