@@ -5,19 +5,22 @@ import Button from '../../components/Button/Button';
 import SellerHeader from '../../components/common/Header/SellerHeader';
 import { useNavigate, useParams } from 'react-router-dom';
 import { productsDetailAPI } from '../../api/productsAPI';
+import { addProduct } from '../../api/sellerAPI';
+
+const INITIAL_VALUES = {
+  product_name: '',
+  image: null,
+  price: 0,
+  shipping_method: 'PARCEL',
+  shipping_fee: 0,
+  stock: 0,
+  product_info: '',
+};
 
 export default function MakeProductPage() {
   const navigate = useNavigate();
   const [inputCount, setInputCount] = useState(0);
-  const [values, setValues] = useState({
-    product_name: '',
-    image: '',
-    price: 0,
-    shipping_method: 'PARCEL',
-    shipping_fee: 0,
-    stock: 0,
-    product_info: '',
-  });
+  const [values, setValues] = useState(INITIAL_VALUES);
   const [buttonColor, setButtonColor] = useState({
     parcel: 'default',
     delivery: 'white',
@@ -43,21 +46,44 @@ export default function MakeProductPage() {
 
   // 파일 input
   const handleFileInput = event => {
-    console.log(event);
     const nextValue = event.target.files[0];
-    console.log(nextValue);
     handleValues('image', nextValue);
   };
 
-  useEffect(() => {
-    console.log(!values.image);
-    if (!values.image) return;
+  // 상품 등록 저장하기
+  const handleSubmit = async event => {
+    event.preventDefault();
 
-    const nextPreview = URL.createObjectURL(values.image);
+    const formData = new FormData();
+    formData.append('product_name', values.product_name);
+    formData.append('image', values.image);
+    formData.append('price', values.price);
+    formData.append('shipping_method', values.shipping_method);
+    formData.append('shipping_fee', values.shipping_fee);
+    formData.append('stock', values.stock);
+    formData.append('product_info', values.product_info);
+
+    console.log(formData);
+
+    try {
+      const response = await addProduct(formData);
+      setValues(INITIAL_VALUES);
+      navigate('/seller-center');
+    } catch (e) {
+      console.log(e);
+    }
+    console.log('-> 저장하기');
+  };
+
+  useEffect(() => {
+    const { image } = values;
+    if (!image) return;
+
+    const nextPreview = URL.createObjectURL(image);
     setPreview(nextPreview);
 
     return () => {
-      setPreview();
+      setPreview(null);
       URL.revokeObjectURL(nextPreview);
     };
   }, [values.image]);
@@ -304,7 +330,12 @@ export default function MakeProductPage() {
           >
             취소
           </Button>
-          <Button size="ms" width="200px" type="submit">
+          <Button
+            size="ms"
+            width="200px"
+            type="submit"
+            onClickEvent={handleSubmit}
+          >
             저장하기
           </Button>
         </div>
