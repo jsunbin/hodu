@@ -18,6 +18,7 @@ const INITIAL_VALUES = {
 };
 
 export default function MakeProductPage() {
+  const { productId } = useParams();
   const navigate = useNavigate();
   const [inputCount, setInputCount] = useState(0);
   const [values, setValues] = useState(INITIAL_VALUES);
@@ -50,9 +51,32 @@ export default function MakeProductPage() {
     handleValues('image', nextValue);
   };
 
+  // 상품 정보
+  const getProductDetails = async () => {
+    try {
+      const response = await productsDetailAPI(productId);
+      const { data } = response;
+      const { image, shipping_method } = data;
+      console.log(data);
+      setValues(data);
+      setPreview(image);
+      setButtonColor(prev => {
+        const updatedColors = Object.fromEntries(
+          Object.keys(prev).map(key => [key, 'white']),
+        );
+        updatedColors[shipping_method.toLowerCase()] = 'default';
+        return updatedColors;
+      });
+    } catch (e) {
+      console.log(e);
+    }
+  };
+
   // 상품 등록 저장하기
   const handleSubmit = async event => {
     event.preventDefault();
+
+    console.log(values.image);
 
     const formData = new FormData();
     formData.append('product_name', values.product_name);
@@ -77,7 +101,7 @@ export default function MakeProductPage() {
 
   useEffect(() => {
     const { image } = values;
-    if (!image) return;
+    if (!image || typeof image === 'string') return;
 
     const nextPreview = URL.createObjectURL(image);
     setPreview(nextPreview);
@@ -86,11 +110,20 @@ export default function MakeProductPage() {
       setPreview(null);
       URL.revokeObjectURL(nextPreview);
     };
-  }, [values.image]);
+  }, [values, values.image]);
+
+  //
+  useEffect(() => {
+    if (productId !== 'new') {
+      console.log('수정');
+      getProductDetails();
+    }
+  }, []);
 
   // 배송방법
-  const handleShippingMethod = (event, option) => {
-    event.preventDefault();
+  const handleShippingMethod = option => {
+    console.log(option);
+    // event.preventDefault();
     setButtonColor(prev => {
       // 모든 값을 'white'로 초기화
       const updatedColors = Object.fromEntries(
@@ -239,6 +272,7 @@ export default function MakeProductPage() {
                             size="ms"
                             width="220px"
                             color={buttonColor.parcel}
+                            type="button"
                             onClickEvent={event =>
                               handleShippingMethod(event, 'parcel')
                             }
@@ -251,6 +285,7 @@ export default function MakeProductPage() {
                             size="ms"
                             width="220px"
                             color={buttonColor.delivery}
+                            type="button"
                             onClickEvent={event =>
                               handleShippingMethod(event, 'delivery')
                             }
