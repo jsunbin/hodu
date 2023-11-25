@@ -24,3 +24,25 @@ export const deleteProduct = async productId => {
     throw e;
   }
 };
+
+// 상품 등록하기
+export const addProduct = async body => {
+  try {
+    const response = await authInstance.post('/products/', body);
+    return response;
+  } catch (e) {
+    console.log(e);
+    throw e;
+  }
+};
+
+// 상품 수저하기
+export const putProduct = async (productId, body) => {
+  try {
+    const response = await authInstance.put(`/products/${productId}/`, body);
+    return response;
+  } catch (e) {
+    console.log(e);
+    throw e;
+  }
+};

@@ -1,10 +1,175 @@
 /** @jsxImportSource @emotion/react */
-import React from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { css } from '@emotion/react';
 import Button from '../../components/Button/Button';
 import SellerHeader from '../../components/common/Header/SellerHeader';
+import { useNavigate, useParams } from 'react-router-dom';
+import { productsDetailAPI } from '../../api/productsAPI';
+import { addProduct, putProduct } from '../../api/sellerAPI';
+
+const INITIAL_VALUES = {
+  product_name: '',
+  image: null,
+  price: 0,
+  shipping_method: 'PARCEL',
+  shipping_fee: 0,
+  stock: 0,
+  product_info: '',
+};
 
 export default function MakeProductPage() {
+  const { productId } = useParams();
+  const navigate = useNavigate();
+  const [inputCount, setInputCount] = useState(0);
+  const [values, setValues] = useState(INITIAL_VALUES);
+  const [buttonColor, setButtonColor] = useState({
+    parcel: 'default',
+    delivery: 'white',
+  });
+  const [preview, setPreview] = useState();
+  const inputRef = useRef();
+
+  const handleChange = event => {
+    const { name, value } = event.target;
+    handleValues(name, value);
+  };
+
+  const handleValues = (name, value) => {
+    console.log(name, value);
+    setValues(prev => ({ ...prev, [name]: value }));
+
+    console.log(values);
+  };
+
+  const handleCount = count => {
+    setInputCount(count);
+  };
+
+  // 파일 input
+  const handleFileInput = event => {
+    const nextValue = event.target.files[0];
+    handleValues('image', nextValue);
+  };
+
+  // 상품 정보
+  const getProductDetails = async () => {
+    try {
+      const response = await productsDetailAPI(productId);
+      const { data } = response;
+      const { image, shipping_method } = data;
+      console.log(data);
+      setValues(data);
+      setPreview(image);
+      setButtonColor(prev => {
+        const updatedColors = Object.fromEntries(
+          Object.keys(prev).map(key => [key, 'white']),
+        );
+        updatedColors[shipping_method.toLowerCase()] = 'default';
+        return updatedColors;
+      });
+    } catch (e) {
+      console.log(e);
+    }
+  };
+
+  // 상품 수정
+  const modifyProducts = async () => {
+    console.log('수정');
+
+    console.log(values.image);
+
+    const formData = new FormData();
+    formData.append('product_name', values.product_name);
+    formData.append('price', values.price);
+    formData.append('shipping_method', values.shipping_method);
+    formData.append('shipping_fee', values.shipping_fee);
+    formData.append('stock', values.stock);
+    formData.append('product_info', values.product_info);
+
+    try {
+      const response = await putProduct(productId, formData);
+      console.log(response);
+      navigate('/seller-center');
+    } catch (e) {
+      console.log(e);
+    }
+  };
+
+  // 상품 등록 저장하기
+  const handleSubmit = async event => {
+    event.preventDefault();
+
+    if (productId !== 'new') {
+      await modifyProducts();
+      return;
+    }
+
+    console.log(values.image);
+
+    const formData = new FormData();
+    formData.append('product_name', values.product_name);
+    formData.append('image', values.image);
+    formData.append('price', values.price);
+    formData.append('shipping_method', values.shipping_method);
+    formData.append('shipping_fee', values.shipping_fee);
+    formData.append('stock', values.stock);
+    formData.append('product_info', values.product_info);
+
+    console.log(formData);
+
+    try {
+      const response = await addProduct(formData);
+      setValues(INITIAL_VALUES);
+      navigate('/seller-center');
+    } catch (e) {
+      console.log(e);
+    }
+    console.log('-> 저장하기');
+  };
+
+  useEffect(() => {
+    const { image } = values;
+    if (!image || typeof image === 'string') return;
+
+    const nextPreview = URL.createObjectURL(image);
+    setPreview(nextPreview);
+
+    return () => {
+      setPreview(null);
+      URL.revokeObjectURL(nextPreview);
+    };
+  }, [values, values.image]);
+
+  //
+  useEffect(() => {
+    if (productId !== 'new') {
+      console.log('수정');
+      getProductDetails();
+    }
+  }, []);
+
+  useEffect(() => {
+    const { product_name } = values;
+    handleCount(product_name.length);
+  }, [values]);
+
+  // 배송방법
+  const handleShippingMethod = option => {
+    console.log(option);
+    // event.preventDefault();
+    setButtonColor(prev => {
+      // 모든 값을 'white'로 초기화
+      const updatedColors = Object.fromEntries(
+        Object.keys(prev).map(key => [key, 'white']),
+      );
+      // 선택한 option만 'default'로 설정
+      updatedColors[option] = 'default';
+      return updatedColors;
+    });
+
+    handleValues('shipping_method', option.toUpperCase());
+  };
+
   return (
     <>
       <SellerHeader />
@@ -34,40 +199,62 @@ export default function MakeProductPage() {
           <div css={contentInfoDivStyles}>
             <div className={'content-left'} css={leftContentDivStyles}>
               <span css={titleSpanStyles}>상품 이미지</span>
+
               <label css={productImgLabelStyles}>
-                <input type="file" style={{ display: 'none' }} />
-                <span>
-                  <svg
-                    width="50"
-                    height="50"
-                    viewBox="0 0 50 50"
-                    fill="none"
-                    xmlns="http://www.w3.org/2000/svg"
-                  >
-                    <circle cx="25" cy="25" r="25" fill="#767676" />
-                    <path
-                      d="M33.9119 13.5415H16.0878C14.6815 13.5415 13.5415 14.6815 13.5415 16.0878V33.9119C13.5415 35.3182 14.6815 36.4582 16.0878 36.4582H33.9119C35.3182 36.4582 36.4582 35.3182 36.4582 33.9119V16.0878C36.4582 14.6815 35.3182 13.5415 33.9119 13.5415Z"
-                      stroke="white"
-                      strokeWidth="1.5"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
+                {preview && (
+                  <img
+                    src={preview}
+                    accept="image/png, image/jpeg"
+                    alt="이미지 미리보기"
+                    style={{ display: 'block', width: '100%', height: '100%' }}
+                  />
+                )}
+
+                {productId === 'new' ? (
+                  <>
+                    <input
+                      type="file"
+                      name="image"
+                      onChange={event => handleFileInput(event)}
+                      ref={inputRef}
+                      style={{ display: 'none' }}
                     />
-                    <path
-                      d="M20.544 22.4537C21.5987 22.4537 22.4537 21.5987 22.4537 20.544C22.4537 19.4893 21.5987 18.6343 20.544 18.6343C19.4893 18.6343 18.6343 19.4893 18.6343 20.544C18.6343 21.5987 19.4893 22.4537 20.544 22.4537Z"
-                      stroke="white"
-                      strokeWidth="1.5"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                    />
-                    <path
-                      d="M36.4583 28.8194L30.0925 22.4536L16.0879 36.4582"
-                      stroke="white"
-                      strokeWidth="1.5"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                    />
-                  </svg>
-                </span>
+                    <span css={imageIconSpanStyles}>
+                      <svg
+                        width="50"
+                        height="50"
+                        viewBox="0 0 50 50"
+                        fill="none"
+                        xmlns="http://www.w3.org/2000/svg"
+                      >
+                        <circle cx="25" cy="25" r="25" fill="#767676" />
+                        <path
+                          d="M33.9119 13.5415H16.0878C14.6815 13.5415 13.5415 14.6815 13.5415 16.0878V33.9119C13.5415 35.3182 14.6815 36.4582 16.0878 36.4582H33.9119C35.3182 36.4582 36.4582 35.3182 36.4582 33.9119V16.0878C36.4582 14.6815 35.3182 13.5415 33.9119 13.5415Z"
+                          stroke="white"
+                          strokeWidth="1.5"
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                        />
+                        <path
+                          d="M20.544 22.4537C21.5987 22.4537 22.4537 21.5987 22.4537 20.544C22.4537 19.4893 21.5987 18.6343 20.544 18.6343C19.4893 18.6343 18.6343 19.4893 18.6343 20.544C18.6343 21.5987 19.4893 22.4537 20.544 22.4537Z"
+                          stroke="white"
+                          strokeWidth="1.5"
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                        />
+                        <path
+                          d="M36.4583 28.8194L30.0925 22.4536L16.0879 36.4582"
+                          stroke="white"
+                          strokeWidth="1.5"
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                        />
+                      </svg>
+                    </span>
+                  </>
+                ) : (
+                  <></>
+                )}
               </label>
             </div>
             <div className={'content-right'} css={rightContentDivStyles}>
@@ -75,8 +262,21 @@ export default function MakeProductPage() {
                 <li>
                   <div>
                     <span css={titleSpanStyles}>상품명</span>
-                    <label>
-                      <input type="text" css={titleInputStyles} />
+                    <label css={titleLabelStyles}>
+                      <input
+                        type="text"
+                        css={titleInputStyles}
+                        name={'product_name'}
+                        value={values.product_name}
+                        onChange={event => {
+                          handleChange(event);
+                          // handleCount(event);
+                        }}
+                        maxLength={20}
+                      />
+                      <span css={titleInputCountSpanStyles}>
+                        {inputCount}/20
+                      </span>
                     </label>
                   </div>
                 </li>
@@ -90,6 +290,9 @@ export default function MakeProductPage() {
                             type="text"
                             inputMode={'numeric'}
                             css={numberInputStyles}
+                            name={'price'}
+                            value={values.price}
+                            onChange={handleChange}
                           />
                         </label>
                       </div>
@@ -101,13 +304,35 @@ export default function MakeProductPage() {
                 <li>
                   <div>
                     <span css={titleSpanStyles}>배송방법</span>
-                    <div css={shippingMethodWrapDivStyles}>
-                      <Button size="ms" width="220px" color={'default'}>
-                        택배, 소포, 등기
-                      </Button>
-                      <Button size="ms" width="220px" color={'white'}>
-                        직접배송(화물배달)
-                      </Button>
+                    <div>
+                      <ul css={shippingMethodListStyles}>
+                        <li>
+                          <Button
+                            size="ms"
+                            width="220px"
+                            color={buttonColor.parcel}
+                            type="button"
+                            onClickEvent={event =>
+                              handleShippingMethod(event, 'parcel')
+                            }
+                          >
+                            택배, 소포, 등기
+                          </Button>
+                        </li>
+                        <li>
+                          <Button
+                            size="ms"
+                            width="220px"
+                            color={buttonColor.delivery}
+                            type="button"
+                            onClickEvent={event =>
+                              handleShippingMethod(event, 'delivery')
+                            }
+                          >
+                            직접배송(화물배달)
+                          </Button>
+                        </li>
+                      </ul>
                     </div>
                   </div>
                 </li>
@@ -121,6 +346,9 @@ export default function MakeProductPage() {
                             type="text"
                             inputMode={'numeric'}
                             css={numberInputStyles}
+                            name={'shipping_fee'}
+                            value={values.shipping_fee}
+                            onChange={handleChange}
                           />
                         </label>
                       </div>
@@ -139,6 +367,9 @@ export default function MakeProductPage() {
                             type="text"
                             inputMode={'numeric'}
                             css={numberInputStyles}
+                            name={'stock'}
+                            value={values.stock}
+                            onChange={handleChange}
                           />
                         </label>
                       </div>
@@ -152,15 +383,33 @@ export default function MakeProductPage() {
           </div>
           <div css={contentDetailsDivStyles}>
             <span css={titleSpanStyles}>상품 상세정보</span>
-            <div css={productDetailInputStyles}></div>
+            <div css={productDetailInputStyles}>
+              <input
+                name={'product_info'}
+                value={values.product_info}
+                onChange={handleChange}
+                css={inputStyles}
+                // style={{ display: 'none' }}
+              />
+            </div>
           </div>
         </div>
 
         <div css={btnGroupDivStyles}>
-          <Button href={'/seller-center'} size="ms" width="200px" color="white">
+          <Button
+            onClickEvent={() => navigate(-1)}
+            size="ms"
+            width="200px"
+            color="white"
+          >
             취소
           </Button>
-          <Button size="ms" width="200px" type="submit">
+          <Button
+            size="ms"
+            width="200px"
+            type="submit"
+            onClickEvent={handleSubmit}
+          >
             저장하기
           </Button>
         </div>
@@ -223,10 +472,16 @@ const productImgLabelStyles = css`
   width: 500px;
   height: 500px;
   background: #c4c4c4;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  display: block;
   cursor: pointer;
+  position: relative;
+`;
+
+const imageIconSpanStyles = css`
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translateX(-50%);
 `;
 
 const rightContentDivStyles = css`
@@ -250,8 +505,12 @@ const titleSpanStyles = css`
   margin-bottom: 10px;
 `;
 
+const titleLabelStyles = css`
+  position: relative;
+`;
+
 const titleInputStyles = css`
-  width: calc(100% - 34px);
+  width: calc(100% - 89px);
   color: #000;
   font-family: Spoqa Han Sans Neo;
   font-size: 16px;
@@ -261,7 +520,20 @@ const titleInputStyles = css`
   border-radius: 5px;
   border: 1px solid var(--C4C4C4, #c4c4c4);
   outline: none;
-  padding: 17px;
+  padding: 17px 70px 17px 17px;
+`;
+
+const titleInputCountSpanStyles = css`
+  color: #c4c4c4;
+  font-family: Spoqa Han Sans Neo;
+  font-size: 14px;
+  font-style: normal;
+  font-weight: 400;
+  line-height: normal;
+
+  position: absolute;
+  top: 0;
+  right: 16px;
 `;
 
 const numberInputDivStyles = css`
@@ -303,9 +575,13 @@ const unitSpanStyles = css`
   right: -1px;
 `;
 
-const shippingMethodWrapDivStyles = css`
+const shippingMethodListStyles = css`
   display: flex;
   gap: 10px;
+
+  li {
+    margin-bottom: 0;
+  }
 `;
 
 const contentDetailsDivStyles = css``;
@@ -324,4 +600,12 @@ const btnGroupDivStyles = css`
   justify-content: flex-end;
   align-items: center;
   gap: 14px;
+`;
+
+const inputStyles = css`
+  width: inherit;
+  height: inherit;
+  background: transparent;
+  outline: none;
+  border: none;
 `;

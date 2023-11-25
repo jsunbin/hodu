@@ -66,6 +66,7 @@ export default function SellerCenterPage() {
   const setCloseModal = useSetRecoilState(closeModalSelector);
 
   const [items, setItems] = useState([]);
+  const [itemCount, setItemCount] = useState(0);
   const modalState = useRecoilValue(modalStateAtom);
   const [productIdToDelete, setProductIdToDelete] = useState(null);
 
@@ -87,7 +88,8 @@ export default function SellerCenterPage() {
   const handleLoad = async () => {
     try {
       const response = await getSellersProducts();
-      const { results } = response;
+      const { count, results } = response;
+      setItemCount(count);
       setItems(results);
     } catch (e) {
       console.log(e);
@@ -155,7 +157,9 @@ export default function SellerCenterPage() {
           <nav>
             <ul css={sideMenuListStyles}>
               <li>
-                <SideMenuItem state={true}>판매중인 상품(3)</SideMenuItem>
+                <SideMenuItem state={true}>
+                  판매중인 상품({itemCount})
+                </SideMenuItem>
               </li>
               <li>
                 <SideMenuItem state={false} stickerContent={'2'}>

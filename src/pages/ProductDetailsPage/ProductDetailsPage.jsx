@@ -203,6 +203,7 @@ export default function ProductDetailsPage() {
                       size="md"
                       width="416px"
                       onClickEvent={handleOrderNowClick}
+                      disabled={isSeller}
                     >
                       바로구매
                     </Button>
@@ -211,6 +212,7 @@ export default function ProductDetailsPage() {
                       color="dark"
                       width="200px"
                       onClickEvent={handleCartClick}
+                      disabled={isSeller}
                     >
                       장바구니
                     </Button>

@@ -1,6 +1,6 @@
 /** @jsxImportSource @emotion/react */
 import React from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { css } from '@emotion/react';
 import Button from '../../Button/Button';
 import shoppingCartIcon from '../../../assets/images/icon-shopping-cart.svg';
@@ -41,6 +41,8 @@ const ulStyles = {
 };
 
 export default function MenuList({ isLogin = false, isSeller = false }) {
+  const navigate = useNavigate();
+
   return !isLogin ? (
     // 로그인 X
     <nav>
@@ -78,12 +80,19 @@ export default function MenuList({ isLogin = false, isSeller = false }) {
     <nav>
       <ul css={ulStyles} className="menu-list">
         <li>
-          <Link to="/cart" className="menu-cart">
+          <Link to="/mypage" className="menu-mypage">
             마이페이지
           </Link>
         </li>
         <li>
-          <Button size="ms" icon={true} className="menu-seller-center">
+          <Button
+            size="ms"
+            icon={true}
+            className="menu-seller-center"
+            onClickEvent={() => {
+              navigate('/seller-center');
+            }}
+          >
             <svg
               width="32"
               height="32"
