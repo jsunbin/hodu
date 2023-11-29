@@ -5,40 +5,35 @@ import { css } from '@emotion/react';
 import Button from '../../Button/Button';
 import shoppingCartIcon from '../../../assets/images/icon-shopping-cart.svg';
 import userIcon from '../../../assets/images/icon-user.svg';
+import UserMenu from '../../UserMenu/UserMenu';
 
 const ulStyles = {
   display: 'flex',
   justifyContent: 'space-between',
   alignItems: 'end',
   gap: '26px',
-  a: {
-    display: 'inline-block',
-    minWidth: '46px',
-    height: '50px',
-    fontSize: '14px',
-    fontWeight: '400',
-    lineHeight: '14px',
-    color: '#767676',
-    textAlign: 'center',
-    fontFamily: 'Spoqa Han Sans Neo',
-    '&::before': {
-      content: "''",
-      display: 'block',
-      width: '32px',
-      height: '32px',
-      margin: '0 auto 4px',
-    },
-    '&.menu-cart::before': {
-      background: `url(${shoppingCartIcon}) top no-repeat`,
-    },
-    '&.menu-mypage::before, &.menu-login::before': {
-      background: `url(${userIcon}) top no-repeat`,
-    },
-  },
-  button: {
-    marginLeft: '4px',
-  },
 };
+
+const linkStyles = props => css`
+  display: inline-block;
+  min-width: 46px;
+  height: 50px;
+  font-size: 14px;
+  font-weight: 400;
+  line-height: 14px;
+  color: #767676;
+  text-align: center;
+  background: transparent;
+
+  &:before {
+    content: '';
+    display: block;
+    width: 32px;
+    height: 32px;
+    margin: 0 auto 4px;
+    background: url(${props.icon}) top no-repeat;
+  }
+`;
 
 export default function MenuList({ isLogin = false, isSeller = false }) {
   const navigate = useNavigate();
@@ -48,12 +43,20 @@ export default function MenuList({ isLogin = false, isSeller = false }) {
     <nav>
       <ul css={ulStyles} className="menu-list">
         <li>
-          <Link to="/cart" className="menu-cart">
+          <Link
+            to="/cart"
+            className="menu-cart"
+            css={linkStyles({ icon: shoppingCartIcon })}
+          >
             장바구니
           </Link>
         </li>
         <li>
-          <Link to="/login" className="menu-login">
+          <Link
+            to="/login"
+            className="menu-login"
+            css={linkStyles({ icon: userIcon })}
+          >
             로그인
           </Link>
         </li>
@@ -64,14 +67,16 @@ export default function MenuList({ isLogin = false, isSeller = false }) {
     <nav>
       <ul css={ulStyles} className="menu-list">
         <li>
-          <Link to="/cart" className="menu-cart">
+          <Link
+            to="/cart"
+            className="menu-cart"
+            css={linkStyles({ icon: shoppingCartIcon })}
+          >
             장바구니
           </Link>
         </li>
         <li>
-          <Link to="/mypage" className="menu-mypage">
-            마이페이지
-          </Link>
+          <UserMenu />
         </li>
       </ul>
     </nav>
@@ -80,9 +85,7 @@ export default function MenuList({ isLogin = false, isSeller = false }) {
     <nav>
       <ul css={ulStyles} className="menu-list">
         <li>
-          <Link to="/mypage" className="menu-mypage">
-            마이페이지
-          </Link>
+          <UserMenu />
         </li>
         <li>
           <Button
