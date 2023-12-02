@@ -1,12 +1,21 @@
 /** @jsxImportSource @emotion/react */
 import React, { useState, useEffect, useCallback } from 'react';
 import { css } from '@emotion/react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import unionIcon from '../../assets/images/icon-union.svg';
 import userIcon from '../../assets/images/icon-user.svg';
+import { useResetRecoilState } from 'recoil';
+import { TokenAtom } from '../../recoil/TokenAtom';
 
 export default function UserMenu() {
+  const navigate = useNavigate();
+  const resetToken = useResetRecoilState(TokenAtom);
   const [isOpen, setIsOpen] = useState(false);
+
+  const handleLogoutClick = () => {
+    resetToken();
+    navigate('/login');
+  };
 
   const handleButtonClick = useCallback(e => {
     e.stopPropagation();
@@ -39,7 +48,9 @@ export default function UserMenu() {
               </Link>
             </li>
             <li>
-              <button css={buttonStyles}>로그아웃</button>
+              <button css={buttonStyles} onClick={handleLogoutClick}>
+                로그아웃
+              </button>
             </li>
           </ul>
         </div>
