@@ -14,6 +14,7 @@ import PaymentPage from './pages/PaymentPage/PaymentPage';
 import OrderCompletePage from './pages/OrderCompletePage/OrderCompletePage';
 import SellerCenterPage from './pages/SellerCenterPage/SellerCenterPage';
 import MakeProductPage from './pages/MakeProductPage/MakeProductPage';
+import NotFoundPage from './pages/NotFoundPage/NotFoundPage';
 
 function App() {
   return (
@@ -43,6 +44,7 @@ function App() {
                 element={<MakeProductPage />}
               />
             </Route>
+            <Route path="*" element={<NotFoundPage />} />
           </Route>
         </Routes>
       </BrowserRouter>
